@@ -4,7 +4,7 @@ import cors from 'cors';
 import { Configuration, OpenAIApi } from 'openai';
 
 // Only for testing purposes, do not use in production
-process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+// process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
 dotenv.config();
 
