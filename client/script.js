@@ -1,3 +1,7 @@
+/* 
+hosted at https://vercel.com/mnaumann79/codex with GitHub credentials
+https://codex-self.vercel.app/
+*/
 import bot from './assets/bot.svg';
 import user from './assets/user.svg';
 // import bot from './assets/bot.svg'

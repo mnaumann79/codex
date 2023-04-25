@@ -1,3 +1,8 @@
+/* 
+hosted at https://vercel.com/mnaumann79/codex; coionnected with GitHub
+https://www.youtube.com/watch?v=2FeymQoKvrk&ab_channel=JavaScriptMastery
+*/
+
 import express from 'express';
 import * as dotenv from 'dotenv';
 import cors from 'cors';
