@@ -36,8 +36,9 @@ app.post('/', async (req, res) => {
 
     const response = await openai.createCompletion({
       model: 'text-davinci-003',
-      prompt:
-        "The following is a conversation with an AI assistant. The assistant is helpful, creative, clever, and very friendly.\n\nHuman: Hello, who are you?\nAI: I am an AI created by OpenAI. How can I help you today?\nHuman: I'd like to cancel my subscription.\nAI:",
+      prompt: `${prompt}`,
+      // prompt:
+      //   "The following is a conversation with an AI assistant. The assistant is helpful, creative, clever, and very friendly.\n\nHuman: Hello, who are you?\nAI: I am an AI created by OpenAI. How can I help you today?\nHuman: I'd like to cancel my subscription.\nAI:",
       temperature: 0.9,
       max_tokens: 150,
       top_p: 1,
@@ -46,7 +47,6 @@ app.post('/', async (req, res) => {
       stop: [' Human:', ' AI:'],
     });
 
-    // prompt: `${prompt}`,
     res.status(200).send({
       bot: response.data.choices[0].text,
     });
