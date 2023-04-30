@@ -83,7 +83,8 @@ const handleSubmit = async (e) => {
 
   //fetch the data from the server -> bot's response
 
-  const response = await fetch('https://codex-nk5p.onrender.com/', {
+  // const response = await fetch('https://codex-nk5p.onrender.com/', {
+  const response = await fetch('http://localhost:5001', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
