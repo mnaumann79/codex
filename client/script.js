@@ -18,7 +18,7 @@ function loader(element) {
   loadInterval = setInterval(() => {
     element.textContent += '.';
 
-    if (element.textContent === '....') {
+    if (element.textContent === '................') {
       element.textContent = '';
     }
   }, 300);
@@ -61,6 +61,8 @@ function chatStripe(isAi, value, uniqueId) {
     `;
 }
 
+let conversation = [];
+
 const handleSubmit = async (e) => {
   e.preventDefault();
 
@@ -83,14 +85,25 @@ const handleSubmit = async (e) => {
 
   //fetch the data from the server -> bot's response
 
+  // const response = await fetch('http://localhost:5001', {
+  //   method: 'POST',
+  //   headers: {
+  //     'Content-Type': 'application/json',
+  //   },
+  //   body: JSON.stringify({
+  //     prompt: data.get('prompt'),
+  //   }),
+  // });
+
   // const response = await fetch('https://codex-nk5p.onrender.com/', {
-  const response = await fetch('http://localhost:5001', {
+  const response = await fetch('http://localhost:5001/chat', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      prompt: data.get('prompt'),
+      userMessage: data.get('prompt'),
+      conversation: conversation,
     }),
   });
 
@@ -98,11 +111,17 @@ const handleSubmit = async (e) => {
 
   messageDiv.innerHTML = '';
 
+  // if (response.ok) {
+  //   const data = await response.json();
+  //   const parsedData = data.bot.trim();
+
+  //   typeText(messageDiv, parsedData);
   if (response.ok) {
     const data = await response.json();
-    const parsedData = data.bot.trim();
+    const parsedData = data.botResponse.trim();
 
     typeText(messageDiv, parsedData);
+    conversation = data.conversation;
   } else {
     const err = await response.text();
 
