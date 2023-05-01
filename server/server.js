@@ -1,5 +1,4 @@
 /* 
-hosted at https://vercel.com/mnaumann79/codex; connected with GitHub
 hosted at https://render.com; connected with GitHub
 https://www.youtube.com/watch?v=2FeymQoKvrk&ab_channel=JavaScriptMastery
 */
@@ -94,6 +93,6 @@ app.post('/chat', async (req, res) => {
   }
 });
 
-app.listen(5001, () => {
-  console.log('Server is running on port http://localhost:5001');
+app.listen(5000, () => {
+  console.log('Server is running on port http://localhost:5000');
 });
