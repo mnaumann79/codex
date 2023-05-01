@@ -30,31 +30,64 @@ app.get('/', async (req, res) => {
   });
 });
 
-app.post('/', async (req, res) => {
-  try {
-    const prompt = req.body.prompt;
+// app.post('/', async (req, res) => {
+//   try {
+//     const prompt = req.body.prompt;
 
+//     const response = await openai.createChatCompletion({
+//       model: 'gpt-3.5-turbo',
+//       // messages: [{"role":"user", "content": "Hello World"}],
+//       messages: [{ role: 'user', content: `${prompt}` }],
+//       // prompt: `${prompt}`,
+//       // prompt:
+//       //   "The following is a conversation with an AI assistant. The assistant is helpful, creative, clever, and very friendly.\n\nHuman: Hello, who are you?\nAI: I am an AI created by OpenAI. How can I help you today?\nHuman: I'd like to cancel my subscription.\nAI:",
+//       temperature: 0.01,
+//       max_tokens: 3000,
+//       top_p: 1,
+//       frequency_penalty: 0.0,
+//       presence_penalty: 0.6,
+//       stop: [' Human:', ' AI:'],
+//     });
+
+//     // console.log(response.data.choices[0].message.content);
+//     // console.log(response.model);
+
+//     res.status(200).send({
+//       bot: response.data.choices[0].message.content,
+//     });
+//   } catch (error) {
+//     console.log(error);
+//     res.status(500).send({ error });
+//   }
+// });
+
+async function generateResponse(messages) {
+  try {
     const response = await openai.createChatCompletion({
       model: 'gpt-3.5-turbo',
-      // messages: [{"role":"user", "content": "Hello World"}],
-      messages: [{ role: 'user', content: `${prompt}` }],
-      // prompt: `${prompt}`,
-      // prompt:
-      //   "The following is a conversation with an AI assistant. The assistant is helpful, creative, clever, and very friendly.\n\nHuman: Hello, who are you?\nAI: I am an AI created by OpenAI. How can I help you today?\nHuman: I'd like to cancel my subscription.\nAI:",
-      temperature: 0.01,
-      max_tokens: 3000,
-      top_p: 1,
-      frequency_penalty: 0.0,
-      presence_penalty: 0.6,
-      stop: [' Human:', ' AI:'],
+      messages: messages,
+      temperature: 0.7,
+      max_tokens: 1500,
     });
 
-    // console.log(response.data.choices[0].message.content);
-    // console.log(response.model);
+    return response.data.choices[0].message.content;
+  } catch (error) {
+    console.log('Error:', error);
+  }
+}
 
-    res.status(200).send({
-      bot: response.data.choices[0].message.content,
-    });
+app.post('/chat', async (req, res) => {
+  try {
+    const userMessage = req.body.userMessage;
+    const conversation = req.body.conversation;
+
+    conversation.push({ role: 'user', content: userMessage });
+
+    const botResponse = await generateResponse(conversation);
+
+    conversation.push({ role: 'assistant', content: botResponse });
+
+    res.status(200).send({ botResponse, conversation });
   } catch (error) {
     console.log(error);
     res.status(500).send({ error });
