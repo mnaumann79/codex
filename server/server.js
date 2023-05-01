@@ -61,6 +61,7 @@ app.get('/', async (req, res) => {
 // });
 
 async function generateResponse(messages) {
+  console.log(messages);
   try {
     const response = await openai.createChatCompletion({
       model: 'gpt-3.5-turbo',
@@ -69,6 +70,7 @@ async function generateResponse(messages) {
       max_tokens: 1500,
     });
 
+    // Check if the response contains the message content
     return response.data.choices[0].message.content;
   } catch (error) {
     console.log('Error:', error);
@@ -86,6 +88,13 @@ app.post('/chat', async (req, res) => {
 
     conversation.push({ role: 'assistant', content: botResponse });
 
+    // console.log(
+    //   'Sending botResponse:',
+    //   botResponse,
+    //   'and conversation:',
+    //   conversation
+    // );
+
     res.status(200).send({ botResponse, conversation });
   } catch (error) {
     console.log(error);
@@ -93,6 +102,6 @@ app.post('/chat', async (req, res) => {
   }
 });
 
-app.listen(5001, () => {
+app.listen(5000, () => {
   console.log('Server is running on port http://localhost:5000');
 });

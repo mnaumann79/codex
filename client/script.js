@@ -6,6 +6,8 @@ import bot from './assets/bot.svg';
 import user from './assets/user.svg';
 // import bot from './assets/bot.svg'
 
+import * as marked from 'marked';
+
 const form = document.querySelector('form');
 const chatContainer = document.querySelector('#chat_container');
 
@@ -13,13 +15,13 @@ let loadInterval;
 
 function loader(element) {
   // '...'
-  element.textContent = '';
+  element.textContent = "I'm thinking";
 
   loadInterval = setInterval(() => {
     element.textContent += '.';
 
     if (element.textContent === '................') {
-      element.textContent = '';
+      element.textContent = "I'm thinking";
     }
   }, 300);
 }
@@ -46,6 +48,10 @@ function generateUniqueId() {
 }
 
 function chatStripe(isAi, value, uniqueId) {
+  // const markdownValue = marked(value);
+  const markdownValue = value;
+  // const sanitizedValue = DOMPurify.sanitize(markdownValue);
+
   return `    
       <div class="wrapper ${isAi && 'ai'}">
         <div class="chat">
@@ -55,13 +61,19 @@ function chatStripe(isAi, value, uniqueId) {
               alt="${isAi ? 'bot' : 'user'}" 
             />
           </div>
-          <div class="message" id="${uniqueId}">${value}</div>
+          <div class="message" id="${uniqueId}">${markdownValue}</div>
         </div>
       </div>
     `;
 }
 
-let conversation = [];
+let conversation = [
+  {
+    role: 'system',
+    content:
+      'The following is a conversation with an AI assistant named Winston. The assistant is helpful, creative, clever, and very friendly. The assistant uses markdown output whenever possible.\n',
+  },
+];
 
 const handleSubmit = async (e) => {
   e.preventDefault();
@@ -85,7 +97,7 @@ const handleSubmit = async (e) => {
 
   //fetch the data from the server -> bot's response
 
-  const response = await fetch('https://codex-nk5p.onrender.com/', {
+  const response = await fetch('https://codex-nk5p.onrender.com', {
   // const response = await fetch('http://localhost:5000/chat', {
     method: 'POST',
     headers: {
@@ -108,10 +120,15 @@ const handleSubmit = async (e) => {
   //   typeText(messageDiv, parsedData);
   if (response.ok) {
     const data = await response.json();
+
+    // console.log('Received data:', data);
+
     const parsedData = data.botResponse.trim();
 
     typeText(messageDiv, parsedData);
+
     conversation = data.conversation;
+    console.log(conversation);
   } else {
     const err = await response.text();
 
@@ -123,7 +140,7 @@ const handleSubmit = async (e) => {
 
 form.addEventListener('submit', handleSubmit);
 form.addEventListener('keyup', (e) => {
-  if (e.keyCode === 13) {
+  if (e.key === 'Enter') {
     handleSubmit(e);
   }
 });
