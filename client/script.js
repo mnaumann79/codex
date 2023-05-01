@@ -85,7 +85,6 @@ const handleSubmit = async (e) => {
 
   //fetch the data from the server -> bot's response
 
-<<<<<<< HEAD
   // const response = await fetch('http://localhost:5001', {
   //   method: 'POST',
   //   headers: {
@@ -98,10 +97,6 @@ const handleSubmit = async (e) => {
 
   // const response = await fetch('https://codex-nk5p.onrender.com/', {
   const response = await fetch('http://localhost:5001/chat', {
-=======
-  const response = await fetch('https://codex-nk5p.onrender.com/', {
-  // const response = await fetch('http://localhost:5001', {
->>>>>>> d694d3ef4c4cc4beb16eba535696f30f3fc36d45
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
