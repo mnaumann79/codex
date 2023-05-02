@@ -7,6 +7,9 @@ import user from './assets/user.svg';
 // import bot from './assets/bot.svg'
 
 import * as marked from 'marked';
+import MarkdownIt from 'markdown-it';
+
+const md = new MarkdownIt();
 
 const form = document.querySelector('form');
 const chatContainer = document.querySelector('#chat_container');
@@ -20,7 +23,7 @@ function loader(element) {
   loadInterval = setInterval(() => {
     element.textContent += '.';
 
-    if (element.textContent === '................') {
+    if (element.textContent === "I'm thinking......") {
       element.textContent = "I'm thinking";
     }
   }, 300);
@@ -28,6 +31,9 @@ function loader(element) {
 
 function typeText(element, text) {
   let index = 0;
+
+  // let markdownText = md.render(text);
+  // console.log(markdownText);
 
   let interval = setInterval(() => {
     if (index < text.length) {
@@ -48,8 +54,9 @@ function generateUniqueId() {
 }
 
 function chatStripe(isAi, value, uniqueId) {
-  // const markdownValue = marked(value);
-  const markdownValue = value;
+  // const markdownValue = md.render(value);
+  // console.log(markdownValue);
+  // const markdownValue = value;
   // const sanitizedValue = DOMPurify.sanitize(markdownValue);
 
   return `    
@@ -61,7 +68,7 @@ function chatStripe(isAi, value, uniqueId) {
               alt="${isAi ? 'bot' : 'user'}" 
             />
           </div>
-          <div class="message" id="${uniqueId}">${markdownValue}</div>
+          <div class="message" id="${uniqueId}">${value}</div>
         </div>
       </div>
     `;
@@ -113,11 +120,6 @@ const handleSubmit = async (e) => {
 
   messageDiv.innerHTML = '';
 
-  // if (response.ok) {
-  //   const data = await response.json();
-  //   const parsedData = data.bot.trim();
-
-  //   typeText(messageDiv, parsedData);
   if (response.ok) {
     const data = await response.json();
 
@@ -125,6 +127,9 @@ const handleSubmit = async (e) => {
 
     const parsedData = data.botResponse.trim();
 
+    // console.log(parsedData);
+    const htmlOutput = md.render(parsedData)
+    // console.log(htmlOutput);
     typeText(messageDiv, parsedData);
 
     conversation = data.conversation;
