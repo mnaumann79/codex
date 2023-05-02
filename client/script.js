@@ -128,9 +128,10 @@ const handleSubmit = async (e) => {
     const parsedData = data.botResponse.trim();
 
     // console.log(parsedData);
-    const htmlOutput = md.render(parsedData)
+    const htmlOutput = md.render(parsedData);
     // console.log(htmlOutput);
-    typeText(messageDiv, parsedData);
+    // typeText(messageDiv, parsedData);
+    messageDiv.innerHTML = htmlOutput;
 
     conversation = data.conversation;
     console.log(conversation);
