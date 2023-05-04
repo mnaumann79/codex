@@ -64,7 +64,8 @@ async function generateResponse(messages) {
   console.log(messages);
   try {
     const response = await openai.createChatCompletion({
-      model: 'gpt-3.5-turbo',
+      model: 'gpt-4',
+      // model: 'gpt-3.5-turbo',
       messages: messages,
       temperature: 0.7,
       max_tokens: 1500,
