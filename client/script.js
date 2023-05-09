@@ -104,7 +104,7 @@ const handleSubmit = async (e) => {
 
   //fetch the data from the server -> bot's response
 
-  const response = await fetch('https://lime-enthusiastic-goat.cyclic.app/chat', {
+  const response = await fetch('https://codex-nk5p.onrender.com/chat', {
     // const response = await fetch('http://localhost:5000/chat', {
     method: 'POST',
     headers: {
