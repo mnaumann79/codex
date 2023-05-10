@@ -64,8 +64,8 @@ async function generateResponse(messages) {
   console.log(messages);
   try {
     const response = await openai.createChatCompletion({
-      model: 'gpt-4',
-      // model: 'gpt-3.5-turbo',
+      // model: 'gpt-4',
+      model: 'gpt-3.5-turbo',
       messages: messages,
       temperature: 0.7,
       max_tokens: 1500,
@@ -88,13 +88,6 @@ app.post('/chat', async (req, res) => {
     const botResponse = await generateResponse(conversation);
 
     conversation.push({ role: 'assistant', content: botResponse });
-
-    // console.log(
-    //   'Sending botResponse:',
-    //   botResponse,
-    //   'and conversation:',
-    //   conversation
-    // );
 
     res.status(200).send({ botResponse, conversation });
   } catch (error) {
