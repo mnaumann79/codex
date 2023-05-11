@@ -16,49 +16,7 @@ dotenv.config();
 // console.log(process.env.OPENAI_API_KEY);
 
 const configuration = new Configuration({ apiKey: process.env.OPENAI_API_KEY });
-
 const openai = new OpenAIApi(configuration);
-
-const app = express();
-app.use(cors());
-app.use(express.json());
-
-app.get('/', async (req, res) => {
-  res.status(200).send({
-    message: 'Hello from Codex',
-  });
-});
-
-// app.post('/', async (req, res) => {
-//   try {
-//     const prompt = req.body.prompt;
-
-//     const response = await openai.createChatCompletion({
-//       model: 'gpt-3.5-turbo',
-//       // messages: [{"role":"user", "content": "Hello World"}],
-//       messages: [{ role: 'user', content: `${prompt}` }],
-//       // prompt: `${prompt}`,
-//       // prompt:
-//       //   "The following is a conversation with an AI assistant. The assistant is helpful, creative, clever, and very friendly.\n\nHuman: Hello, who are you?\nAI: I am an AI created by OpenAI. How can I help you today?\nHuman: I'd like to cancel my subscription.\nAI:",
-//       temperature: 0.01,
-//       max_tokens: 3000,
-//       top_p: 1,
-//       frequency_penalty: 0.0,
-//       presence_penalty: 0.6,
-//       stop: [' Human:', ' AI:'],
-//     });
-
-//     // console.log(response.data.choices[0].message.content);
-//     // console.log(response.model);
-
-//     res.status(200).send({
-//       bot: response.data.choices[0].message.content,
-//     });
-//   } catch (error) {
-//     console.log(error);
-//     res.status(500).send({ error });
-//   }
-// });
 
 async function generateResponse(messages) {
   console.log(messages);
@@ -68,15 +26,27 @@ async function generateResponse(messages) {
       model: 'gpt-3.5-turbo',
       messages: messages,
       temperature: 0.7,
-      max_tokens: 1500,
+      max_tokens: 500,
     });
 
     // Check if the response contains the message content
     return response.data.choices[0].message.content;
+    
   } catch (error) {
     console.log('Error:', error);
   }
 }
+
+const app = express();
+
+app.use(cors());
+app.use(express.json());
+
+app.get('/', async (req, res) => {
+  res.status(200).send({
+    message: 'Hello from Codex',
+  });
+});
 
 app.post('/chat', async (req, res) => {
   try {
