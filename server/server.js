@@ -56,8 +56,8 @@ async function generateResponse(messages, sendSse) {
       const { delta } = choices[0];
       const { content } = delta;
       if (content) {
-        // resultText.innerText += content;
         const botResponse = content;
+        // console.log(`Content: ${botResponse}`);
         assistantContent += botResponse;
         sendSse(responseId, { botResponse });
       }

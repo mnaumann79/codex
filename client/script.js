@@ -103,32 +103,33 @@ const handleSubmit = async (e) => {
   // loader(messageDiv);
 
   // Create an EventSource instance to open a streaming connection
-  const source = new EventSource(
-    `https://codex-nk5p.onrender.com/chat?userMessage=${encodeURIComponent(
-      data.get('prompt')
-    )}&conversation=${encodeURIComponent(JSON.stringify(conversation))}`
-  );
   // const source = new EventSource(
-  //   `http://localhost:5000/chat?userMessage=${encodeURIComponent(
+  //   `https://codex-nk5p.onrender.com/chat?userMessage=${encodeURIComponent(
   //     data.get('prompt')
   //   )}&conversation=${encodeURIComponent(JSON.stringify(conversation))}`
   // );
+  const source = new EventSource(
+    `http://localhost:5000/chat?userMessage=${encodeURIComponent(
+      data.get('prompt')
+    )}&conversation=${encodeURIComponent(JSON.stringify(conversation))}`
+  );
 
   messageDiv.innerHTML = '';
 
   source.onmessage = async function (event) {
-
     clearInterval(loadInterval);
     // console.log(event);
     const data = JSON.parse(event.data);
 
-    // console.log('Received data:', data);
+    console.log('Received data:', data.botResponse);
     // const parsedData = data.botResponse.trim();
     const parsedData = data.botResponse;
 
     // typeText(messageDiv, parsedData);
 
-    messageDiv.innerHTML = messageDiv.innerHTML + parsedData;
+    if (parsedData) {
+      messageDiv.innerHTML = messageDiv.innerHTML + parsedData;
+    }
 
     conversation = data.conversation;
     console.log(conversation);
