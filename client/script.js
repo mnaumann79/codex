@@ -104,8 +104,8 @@ const handleSubmit = async (e) => {
 
   //fetch the data from the server -> bot's response
 
-  const response = await fetch('https://codex-nk5p.onrender.com/chat', {
-    // const response = await fetch('http://localhost:5000/chat', {
+  // const response = await fetch('https://codex-nk5p.onrender.com/chat', {
+    const response = await fetch('http://localhost:5000/chat', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -128,10 +128,10 @@ const handleSubmit = async (e) => {
     const parsedData = data.botResponse.trim();
 
     // console.log(parsedData);
-    const htmlOutput = md.render(parsedData);
+    // const htmlOutput = md.render(parsedData);
     // console.log(htmlOutput);
-    // typeText(messageDiv, parsedData);
-    messageDiv.innerHTML = htmlOutput;
+    typeText(messageDiv, parsedData);
+    // messageDiv.innerHTML = htmlOutput;
 
     conversation = data.conversation;
     console.log(conversation);
