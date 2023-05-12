@@ -3,7 +3,7 @@ hosted at https://render.com; connected with GitHub
 https://www.youtube.com/watch?v=2FeymQoKvrk&ab_channel=JavaScriptMastery
 */
 
-import express from 'express';
+import express, { response } from 'express';
 import * as dotenv from 'dotenv';
 import cors from 'cors';
 // import { Configuration, OpenAIApi } from 'openai';
@@ -20,9 +20,9 @@ dotenv.config();
 // const configuration = new Configuration({ apiKey: process.env.OPENAI_API_KEY });
 // const openai = new OpenAIApi(configuration);
 
-async function generateResponse(messages) {
+async function generateResponse(messages, sendSse) {
   try {
-      const response = await fetch(process.env.OPENAI_API_URL, {
+    const response = await fetch(process.env.OPENAI_API_URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -60,19 +60,24 @@ async function generateResponse(messages) {
       .map((line) => JSON.parse(line)); // Parse the JSON string
     // console.log(parsedLines);
 
+    let id = 0;
     for (const parsedLine of parsedLines) {
       const { choices } = parsedLine;
       const { delta } = choices[0];
       const { content } = delta;
       if (content) {
         // resultText.innerText += content;
-        console.log(content);
+        const botResponse = content;
+        const responseId = Date.now();
+        // console.log(content);
+        sendSse(responseId, { botResponse });
       }
     }
 
     // Check if the response contains the message content
     // return data.choices[0].message.content;
-    return 'Wait for it!';
+    // return 'Wait for it!';
+    // return 'Wait for it!';
   } catch (error) {
     console.log('Error:', error);
   }
@@ -89,18 +94,32 @@ app.get('/', async (req, res) => {
   });
 });
 
-app.post('/chat', async (req, res) => {
+app.get('/chat', async (req, res) => {
   try {
-    const userMessage = req.body.userMessage;
-    const conversation = req.body.conversation;
+    // console.log(req.query);
+    const userMessage = req.query.userMessage;
+    const conversation = JSON.parse(req.query.conversation);
+
 
     conversation.push({ role: 'user', content: userMessage });
 
-    const botResponse = await generateResponse(conversation);
+    // Set headers for SSE
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection', 'keep-alive');
 
-    conversation.push({ role: 'assistant', content: botResponse });
+    // Function to send a server-sent event
+    const sendSse = (id, data) => {
+      res.write(`id: ${id}\n`);
+      res.write(`data: ${JSON.stringify(data)}\n\n`);
+    };
 
-    res.status(200).send({ botResponse, conversation });
+    await generateResponse(conversation, sendSse);
+    res.end();
+    // conversation.push({ role: 'assistant', content: botResponse });
+
+    // sendSse(responseId, { botResponse, conversation });
+    // res.status(200).send({ botResponse, conversation });
   } catch (error) {
     console.log(error);
     res.status(500).send({ error });

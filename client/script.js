@@ -101,9 +101,8 @@ const handleSubmit = async (e) => {
   const messageDiv = document.getElementById(uniqueId);
 
   loader(messageDiv);
-
+  /* 
   //fetch the data from the server -> bot's response
-
   // const response = await fetch('https://codex-nk5p.onrender.com/chat', {
     const response = await fetch('http://localhost:5000/chat', {
     method: 'POST',
@@ -123,7 +122,7 @@ const handleSubmit = async (e) => {
   if (response.ok) {
     const data = await response.json();
 
-    // console.log('Received data:', data);
+    console.log('Received data:', data);
 
     const parsedData = data.botResponse.trim();
 
@@ -135,13 +134,50 @@ const handleSubmit = async (e) => {
 
     conversation = data.conversation;
     console.log(conversation);
-  } else {
+  } 
+ */
+
+  // Create an EventSource instance to open a streaming connection
+  const source = new EventSource(
+    `http://localhost:5000/chat?userMessage=${encodeURIComponent(
+      data.get('prompt')
+    )}&conversation=${encodeURIComponent(JSON.stringify(conversation))}`
+  );
+
+  source.onmessage = async function (event) {
+    clearInterval(loadInterval);
+    // messageDiv.innerHTML = '';
+    console.log(event);
+    const data = JSON.parse(event.data);
+
+    console.log('Received data:', data);
+
+    // const parsedData = data.botResponse.trim();
+    const parsedData = data.botResponse;
+
+    // typeText(messageDiv, parsedData);
+
+    messageDiv.innerHTML = messageDiv.innerHTML + parsedData;
+
+    conversation = data.conversation;
+    console.log(conversation);
+  };
+
+  /*   
+  else {
     const err = await response.text();
 
     messageDiv.innerHTML = 'Something went wrong';
     console.log(err);
     alert(err);
   }
+ */
+  source.onerror = function (err) {
+    clearInterval(loadInterval);
+    messageDiv.innerHTML = 'Something went wrong';
+    console.log(err);
+    // alert(err);
+  };
 };
 
 form.addEventListener('submit', handleSubmit);
