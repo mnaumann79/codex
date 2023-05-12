@@ -6,19 +6,12 @@ https://www.youtube.com/watch?v=2FeymQoKvrk&ab_channel=JavaScriptMastery
 import express, { response } from 'express';
 import * as dotenv from 'dotenv';
 import cors from 'cors';
-// import { Configuration, OpenAIApi } from 'openai';
-
-// import { TextDecoder } from 'util';
 
 // Only for testing purposes, do not use in production
 // process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
 dotenv.config();
-
 // console.log(process.env.OPENAI_API_KEY);
-
-// const configuration = new Configuration({ apiKey: process.env.OPENAI_API_KEY });
-// const openai = new OpenAIApi(configuration);
 
 async function generateResponse(messages, sendSse) {
   try {
@@ -35,17 +28,13 @@ async function generateResponse(messages, sendSse) {
         max_tokens: 100,
         stream: true, //for the streaming purpose
       }),
-      // signal, //ES2015 short-hand syntax
     });
 
-    // const data = await response.json();
-    // console.log(data);
     if (!response.ok) {
       throw new Error(
         `OpenAI API responded with status code ${response.status}`
       );
     }
-    // const decoder = new TextDecoder('utf8');
 
     let chunks = [];
     for await (let chunk of response.body) {
@@ -58,9 +47,7 @@ async function generateResponse(messages, sendSse) {
       .map((line) => line.replace(/^data: /, '').trim()) // Remove the "data: " prefix
       .filter((line) => line !== '' && line !== '[DONE]') // Remove empty lines and "[DONE]"
       .map((line) => JSON.parse(line)); // Parse the JSON string
-    // console.log(parsedLines);
 
-    let id = 0;
     let assistantContent = '';
     const responseId = Date.now();
 
@@ -75,31 +62,27 @@ async function generateResponse(messages, sendSse) {
         sendSse(responseId, { botResponse });
       }
     }
-    console.log(assistantContent);
-    // let conversation = [];
+
+    // console.log(assistantContent);
     messages.push({
       role: 'assistant',
       content: `${assistantContent}`,
     });
     const conversation = messages;
+    // console.log(conversation);
 
-    console.log(conversation);
     sendSse(responseId, { conversation });
-    // console.log(messages);
 
-    // Check if the response contains the message content
-    // return data.choices[0].message.content;
-    // return 'Wait for it!';
   } catch (error) {
     console.log('Error:', error);
   }
 }
 
 const app = express();
-
 app.use(cors());
 app.use(express.json());
 
+//check if the server is live
 app.get('/', async (req, res) => {
   res.status(200).send({
     message: 'Hello from Codex',
@@ -108,7 +91,6 @@ app.get('/', async (req, res) => {
 
 app.get('/chat', async (req, res) => {
   try {
-    // console.log(req.query);
     const userMessage = req.query.userMessage;
     const conversation = JSON.parse(req.query.conversation);
 
@@ -127,10 +109,6 @@ app.get('/chat', async (req, res) => {
 
     await generateResponse(conversation, sendSse);
     // res.end();
-    // conversation.push({ role: 'assistant', content: botResponse });
-
-    // sendSse(responseId, { botResponse, conversation });
-    // res.status(200).send({ botResponse, conversation });
   } catch (error) {
     console.log(error);
     res.status(500).send({ error });
