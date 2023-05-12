@@ -61,6 +61,9 @@ async function generateResponse(messages, sendSse) {
     // console.log(parsedLines);
 
     let id = 0;
+    let assistantContent = '';
+    const responseId = Date.now();
+
     for (const parsedLine of parsedLines) {
       const { choices } = parsedLine;
       const { delta } = choices[0];
@@ -68,15 +71,24 @@ async function generateResponse(messages, sendSse) {
       if (content) {
         // resultText.innerText += content;
         const botResponse = content;
-        const responseId = Date.now();
-        // console.log(content);
+        assistantContent += botResponse;
         sendSse(responseId, { botResponse });
       }
     }
+    console.log(assistantContent);
+    // let conversation = [];
+    messages.push({
+      role: 'assistant',
+      content: `${assistantContent}`,
+    });
+    const conversation = messages;
+
+    console.log(conversation);
+    sendSse(responseId, { conversation });
+    // console.log(messages);
 
     // Check if the response contains the message content
     // return data.choices[0].message.content;
-    // return 'Wait for it!';
     // return 'Wait for it!';
   } catch (error) {
     console.log('Error:', error);
@@ -100,7 +112,6 @@ app.get('/chat', async (req, res) => {
     const userMessage = req.query.userMessage;
     const conversation = JSON.parse(req.query.conversation);
 
-
     conversation.push({ role: 'user', content: userMessage });
 
     // Set headers for SSE
@@ -115,7 +126,7 @@ app.get('/chat', async (req, res) => {
     };
 
     await generateResponse(conversation, sendSse);
-    res.end();
+    // res.end();
     // conversation.push({ role: 'assistant', content: botResponse });
 
     // sendSse(responseId, { botResponse, conversation });

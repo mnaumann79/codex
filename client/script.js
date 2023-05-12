@@ -100,7 +100,7 @@ const handleSubmit = async (e) => {
 
   const messageDiv = document.getElementById(uniqueId);
 
-  loader(messageDiv);
+  // loader(messageDiv);
   /* 
   //fetch the data from the server -> bot's response
   // const response = await fetch('https://codex-nk5p.onrender.com/chat', {
@@ -144,13 +144,14 @@ const handleSubmit = async (e) => {
     )}&conversation=${encodeURIComponent(JSON.stringify(conversation))}`
   );
 
+  messageDiv.innerHTML = '';
+
   source.onmessage = async function (event) {
     clearInterval(loadInterval);
-    // messageDiv.innerHTML = '';
-    console.log(event);
+    // console.log(event);
     const data = JSON.parse(event.data);
 
-    console.log('Received data:', data);
+    // console.log('Received data:', data);
 
     // const parsedData = data.botResponse.trim();
     const parsedData = data.botResponse;
