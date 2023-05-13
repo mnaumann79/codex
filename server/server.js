@@ -3,7 +3,7 @@ hosted at https://render.com; connected with GitHub
 https://www.youtube.com/watch?v=2FeymQoKvrk&ab_channel=JavaScriptMastery
 */
 
-import express, { response } from 'express';
+import express from 'express';
 import * as dotenv from 'dotenv';
 import cors from 'cors';
 
@@ -72,7 +72,6 @@ async function generateResponse(messages, sendSse) {
     // console.log(conversation);
 
     sendSse(responseId, { conversation });
-
   } catch (error) {
     console.log('Error:', error);
   }
