@@ -103,16 +103,11 @@ const handleSubmit = async (e) => {
   // loader(messageDiv);
 
   // Create an EventSource instance to open a streaming connection
-  const source = new EventSource(
-    `https://lime-enthusiastic-goat.cyclic.app/chat?userMessage=${encodeURIComponent(
+    const source = new EventSource(
+    `https://codex-nk5p.onrender.com/chat?userMessage=${encodeURIComponent(
       data.get('prompt')
     )}&conversation=${encodeURIComponent(JSON.stringify(conversation))}`
   );
-  //  const source = new EventSource(
-  //  `https://codex-nk5p.onrender.com/chat?userMessage=${encodeURIComponent(
-  //    data.get('prompt')
-  //  )}&conversation=${encodeURIComponent(JSON.stringify(conversation))}`
-  //);
   // const source = new EventSource(
   //   `http://localhost:5000/chat?userMessage=${encodeURIComponent(
   //     data.get('prompt')
