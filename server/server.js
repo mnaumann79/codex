@@ -24,13 +24,14 @@ async function generateResponse(messages, sendSse) {
       },
       body: JSON.stringify({
         model: 'gpt-3.5-turbo',
-        //model: 'gpt-4',
+        // model: 'gpt-4',
         messages: messages,
         max_tokens: 500,
         stream: true, //for the streaming purpose
       }),
     });
-
+    count++;
+    console.log(count);
     if (!response.ok) {
       throw new Error(
         `OpenAI API responded with status code ${response.status}`
@@ -71,13 +72,15 @@ async function generateResponse(messages, sendSse) {
     });
     const conversation = messages;
     // console.log(conversation);
-
+    
     sendSse(responseId, { conversation });
+    // res.end();
   } catch (error) {
     console.log('Error:', error);
   }
 }
 
+let count = 0;
 const app = express();
 app.use(cors());
 app.use(express.json());
@@ -108,7 +111,6 @@ app.get('/chat', async (req, res) => {
     };
 
     await generateResponse(conversation, sendSse);
-    // res.end();
   } catch (error) {
     console.log(error);
     res.status(500).send({ error });

@@ -84,6 +84,7 @@ let conversation = [
 
 const handleSubmit = async (e) => {
   e.preventDefault();
+  const start = new Date();
 
   const data = new FormData(form);
 
@@ -103,42 +104,50 @@ const handleSubmit = async (e) => {
   // loader(messageDiv);
 
   // Create an EventSource instance to open a streaming connection
-    const source = new EventSource(
-    `https://codex-nk5p.onrender.com/chat?userMessage=${encodeURIComponent(
-      data.get('prompt')
-    )}&conversation=${encodeURIComponent(JSON.stringify(conversation))}`
-  );
-  // const source = new EventSource(
-  //   `http://localhost:5000/chat?userMessage=${encodeURIComponent(
+  //   const source = new EventSource(
+  //   `https://codex-nk5p.onrender.com/chat?userMessage=${encodeURIComponent(
   //     data.get('prompt')
   //   )}&conversation=${encodeURIComponent(JSON.stringify(conversation))}`
   // );
+  const source = new EventSource(
+    `http://localhost:5000/chat?userMessage=${encodeURIComponent(
+      data.get('prompt')
+    )}&conversation=${encodeURIComponent(JSON.stringify(conversation))}`
+  );
 
   messageDiv.innerHTML = '';
+  const chunks = [];
 
   source.onmessage = async function (event) {
+    const end = new Date();
+    console.log(`time to respond: ${(end - start)/1000} s`);
     clearInterval(loadInterval);
     // console.log(event);
     const data = JSON.parse(event.data);
 
-    console.log('Received data:', data.botResponse);
     // const parsedData = data.botResponse.trim();
     const parsedData = data.botResponse;
-
-    // typeText(messageDiv, parsedData);
-
+    console.log('Received data:', parsedData);
+    
+    chunks.push(parsedData);
+    console.log(`chunk: ${chunks}`);
     if (parsedData) {
-      messageDiv.innerHTML = messageDiv.innerHTML + parsedData;
+      for (const chunk of chunks) {
+
+        typeText(messageDiv, chunk);
+      }
+      // messageDiv.innerHTML = messageDiv.innerHTML + parsedData;
     }
 
     conversation = data.conversation;
-    console.log(conversation);
+    // console.log(conversation);
   };
 
   source.onerror = function (err) {
     clearInterval(loadInterval);
-    messageDiv.innerHTML = 'Something went wrong';
+    // messageDiv.innerHTML = 'Something went wrong';
     console.log(err);
+    source.close();
     // alert(err);
   };
 };
