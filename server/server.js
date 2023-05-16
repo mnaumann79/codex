@@ -23,8 +23,8 @@ async function generateResponse(messages, sendSse) {
         Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
       },
       body: JSON.stringify({
-        model: 'gpt-3.5-turbo',
-        // model: 'gpt-4',
+        // model: 'gpt-3.5-turbo',
+        model: 'gpt-4',
         messages: messages,
         max_tokens: 500,
         stream: true, //for the streaming purpose
@@ -74,7 +74,6 @@ async function generateResponse(messages, sendSse) {
     // console.log(conversation);
     
     sendSse(responseId, { conversation });
-    // res.end();
   } catch (error) {
     console.log('Error:', error);
   }
@@ -111,6 +110,8 @@ app.get('/chat', async (req, res) => {
     };
 
     await generateResponse(conversation, sendSse);
+    res.end();
+    
   } catch (error) {
     console.log(error);
     res.status(500).send({ error });

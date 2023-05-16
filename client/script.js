@@ -116,37 +116,44 @@ const handleSubmit = async (e) => {
   );
 
   messageDiv.innerHTML = '';
-  const chunks = [];
+  // const chunks = [];
+
+  //count only the first onmessage call
+  let counter = 0;
 
   source.onmessage = async function (event) {
-    const end = new Date();
-    console.log(`time to respond: ${(end - start)/1000} s`);
+    //check the time until the data are coming in
+    if (counter === 0) {
+      const end = new Date();
+      console.log(`time to respond: ${(end - start) / 1000} s`);
+    }
+    //count the messages coming in
+    counter++;
     clearInterval(loadInterval);
     // console.log(event);
     const data = JSON.parse(event.data);
 
     // const parsedData = data.botResponse.trim();
     const parsedData = data.botResponse;
-    console.log('Received data:', parsedData);
-    
-    chunks.push(parsedData);
-    console.log(`chunk: ${chunks}`);
-    if (parsedData) {
-      for (const chunk of chunks) {
+    // console.log('Received data:', parsedData);
 
-        typeText(messageDiv, chunk);
-      }
-      // messageDiv.innerHTML = messageDiv.innerHTML + parsedData;
+    // chunks.push(parsedData);
+    // console.log(`chunk: ${chunks}`);
+    if (parsedData) {
+      // for (const chunk of chunks) {
+
+      //   typeText(messageDiv, chunk);
+      // }
+      messageDiv.innerHTML = messageDiv.innerHTML + parsedData;
     }
 
     conversation = data.conversation;
     // console.log(conversation);
   };
-
   source.onerror = function (err) {
     clearInterval(loadInterval);
     // messageDiv.innerHTML = 'Something went wrong';
-    console.log(err);
+    // console.log(err);
     source.close();
     // alert(err);
   };
