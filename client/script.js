@@ -18,13 +18,13 @@ let loadInterval;
 
 function loader(element) {
   // '...'
-  element.textContent = "I'm thinking";
+  element.textContent = '';
 
   loadInterval = setInterval(() => {
     element.textContent += '.';
 
-    if (element.textContent === "I'm thinking......") {
-      element.textContent = "I'm thinking";
+    if (element.textContent === '....') {
+      element.textContent = '';
     }
   }, 300);
 }
@@ -101,7 +101,7 @@ const handleSubmit = async (e) => {
 
   const messageDiv = document.getElementById(uniqueId);
 
-  // loader(messageDiv);
+  loader(messageDiv);
 
   // Create an EventSource instance to open a streaming connection
   //   const source = new EventSource(
