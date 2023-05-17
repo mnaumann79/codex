@@ -8,7 +8,6 @@ import fetch from 'node-fetch';
 import * as dotenv from 'dotenv';
 import cors from 'cors';
 import { Transform } from 'stream';
-import { resolve } from 'path';
 
 // Only for testing purposes, do not use in production
 // process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
@@ -16,7 +15,7 @@ import { resolve } from 'path';
 dotenv.config();
 // console.log(process.env.OPENAI_API_KEY);
 
-async function generateResponse(messages, sendSse) {
+async function generateResponse(conversation, sendSse) {
   try {
     const response = await fetch(process.env.OPENAI_API_URL, {
       method: 'POST',
@@ -27,23 +26,24 @@ async function generateResponse(messages, sendSse) {
       body: JSON.stringify({
         model: 'gpt-3.5-turbo',
         // model: 'gpt-4',
-        messages: messages,
+        messages: conversation,
         max_tokens: 500,
         stream: true, //for the streaming purpose
       }),
     });
 
     let assistantContent = '';
+    const responseId = Date.now();
 
+    //count the number of fetch requests since the reboot
     count++;
     console.log(count);
+
     if (!response.ok) {
       throw new Error(
         `OpenAI API responded with status code ${response.status}`
       );
     }
-
-    const responseId = Date.now();
 
     await new Promise((resolve, reject) => {
       response.body
@@ -78,20 +78,15 @@ async function generateResponse(messages, sendSse) {
           // Consume the data to trigger the 'end' event
         })
         .on('end', () => {
-          const endTime = Date.now();
-          console.log(`That took ${(endTime - responseId) / 1000} s`);
+          // check the time for the response
+          // const endTime = Date.now();
+          // console.log(`That took ${(endTime - responseId) / 1000} s`);
 
-          // console.log(`Assistant: ${assistantContent}`);
-
-          messages.push({
+          conversation.push({
             role: 'assistant',
             content: `${assistantContent}`,
           });
-          const conversation = messages;
-          // console.log(messages);
-
           sendSse(responseId, { conversation });
-
           resolve();
         })
         .on('error', () => {
@@ -100,58 +95,18 @@ async function generateResponse(messages, sendSse) {
         });
     });
 
-    // let chunks = [];
-    // for await (let chunk of response.body) {
-    //   chunks.push(chunk);
-    // }
-    // let chunk = Buffer.concat(chunks).toString(); // Convert Buffer to string
-
-    // // console.log(chunk);
-    // const lines = chunk.split('\n');
-    // const parsedLines = lines
-    //   .map((line) => line.replace(/^data: /, '').trim()) // Remove the "data: " prefix
-    //   .filter((line) => line !== '' && line !== '[DONE]') // Remove empty lines and "[DONE]"
-    //   .map((line) => JSON.parse(line)); // Parse the JSON string
-
-    // // const responseId = Date.now();
-
-    //   for (const parsedLine of parsedLines) {
-    //     const { choices } = parsedLine;
-    //     const { delta } = choices[0];
-    //     const { content } = delta;
-    //     if (content) {
-    //       const botResponse = content;
-    //       // console.log(`Content: ${botResponse}`);
-    //       // assistantContent += botResponse;
-    //       sendSse(responseId, { botResponse });
-    //     }
-    //   }
-    // messages.push({
-    //   role: 'assistant',
-    //   content: `${assistantContent}`,
-    // });
-    // const conversation = messages;
-    // // console.log(messages);
-
-    // sendSse(responseId, { conversation });
-
     // res.end();
   } catch (error) {
     console.log('Error:', error);
   }
 }
 
+// set up a count variable to count the number of fetch requests since the reboot
 let count = 0;
+
 const app = express();
 app.use(cors());
 app.use(express.json());
-
-//check if the server is live
-app.get('/', async (req, res) => {
-  res.status(200).send({
-    message: 'Hello from Codex',
-  });
-});
 
 app.get('/chat', async (req, res) => {
   try {
@@ -179,5 +134,5 @@ app.get('/chat', async (req, res) => {
 });
 
 app.listen(5000, () => {
-  console.log('Server is running on port http://localhost:5000');
+  console.log('Server is listening');
 });
