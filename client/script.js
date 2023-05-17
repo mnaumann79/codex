@@ -18,13 +18,13 @@ let loadInterval;
 
 function loader(element) {
   // '...'
-  element.textContent = '';
+  element.textContent = "I'm thinking";
 
   loadInterval = setInterval(() => {
     element.textContent += '.';
 
-    if (element.textContent === '....') {
-      element.textContent = '';
+    if (element.textContent === "I'm thinking......") {
+      element.textContent = "I'm thinking";
     }
   }, 300);
 }
@@ -74,6 +74,8 @@ function chatStripe(isAi, value, uniqueId) {
     `;
 }
 
+const model = 'gpt-4';
+
 let conversation = [
   {
     role: 'system',
@@ -101,7 +103,7 @@ const handleSubmit = async (e) => {
 
   const messageDiv = document.getElementById(uniqueId);
 
-  loader(messageDiv);
+  // loader(messageDiv);
 
   // Create an EventSource instance to open a streaming connection
   //   const source = new EventSource(
@@ -109,53 +111,39 @@ const handleSubmit = async (e) => {
   //     data.get('prompt')
   //   )}&conversation=${encodeURIComponent(JSON.stringify(conversation))}`
   // );
+
+  console.log(model);
   const source = new EventSource(
-    `http://localhost:5000/chat?userMessage=${encodeURIComponent(
-      data.get('prompt')
-    )}&conversation=${encodeURIComponent(JSON.stringify(conversation))}`
+    `http://localhost:5000/chat?model=${encodeURIComponent(model)}
+      &userMessage=${encodeURIComponent(data.get('prompt'))}
+      &conversation=${encodeURIComponent(JSON.stringify(conversation))}`
   );
 
   messageDiv.innerHTML = '';
-  // const chunks = [];
-
-  //count only the first onmessage call
-  let counter = 0;
 
   source.onmessage = async function (event) {
-    //check the time until the data are coming in
-    if (counter === 0) {
-      const end = new Date();
-      console.log(`time to respond: ${(end - start) / 1000} s`);
-    }
-    //count the messages coming in
-    counter++;
+    const end = new Date();
+    console.log(`time to respond: ${(end - start) / 1000} s`);
     clearInterval(loadInterval);
-    // console.log(event);
     const data = JSON.parse(event.data);
 
-    // const parsedData = data.botResponse.trim();
-    const parsedData = data.botResponse;
-    // console.log('Received data:', parsedData);
-
-    // chunks.push(parsedData);
-    // console.log(`chunk: ${chunks}`);
-    if (parsedData) {
-      // for (const chunk of chunks) {
-
-      //   typeText(messageDiv, chunk);
-      // }
+    if (data.botResponse) {
+      const parsedData = data.botResponse;
+      // console.log('Received data:', parsedData);
       messageDiv.innerHTML = messageDiv.innerHTML + parsedData;
     }
 
-    conversation = data.conversation;
-    // console.log(conversation);
+    if (data.conversation) {
+      conversation = data.conversation;
+      console.log(conversation);
+    }
   };
+
   source.onerror = function (err) {
     clearInterval(loadInterval);
-    // messageDiv.innerHTML = 'Something went wrong';
-    // console.log(err);
+    // messageDiv.innerHTML = `${err.type}`;
+    // console.log(err.type);
     source.close();
-    // alert(err);
   };
 };
 
