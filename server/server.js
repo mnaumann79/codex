@@ -43,8 +43,8 @@ async function generateResponse(model = 'gpt-4', conversation, res) {
     const responseId = Date.now();
 
     //count the number of fetch requests since the reboot
-    // count++;
-    // console.log(count);
+    count++;
+    console.log(count);
 
     if (!response.ok) {
       throw new Error(
