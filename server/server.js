@@ -78,8 +78,10 @@ async function generateResponse(messages, sendSse) {
           // Consume the data to trigger the 'end' event
         })
         .on('end', () => {
-          console.log('Response ended');
-          console.log(`Assistant: ${assistantContent}`);
+          const endTime = Date.now();
+          console.log(`That took ${(endTime - responseId) / 1000} s`);
+
+          // console.log(`Assistant: ${assistantContent}`);
 
           messages.push({
             role: 'assistant',
@@ -111,7 +113,7 @@ async function generateResponse(messages, sendSse) {
     //   .filter((line) => line !== '' && line !== '[DONE]') // Remove empty lines and "[DONE]"
     //   .map((line) => JSON.parse(line)); // Parse the JSON string
 
-    // const responseId = Date.now();
+    // // const responseId = Date.now();
 
     //   for (const parsedLine of parsedLines) {
     //     const { choices } = parsedLine;
@@ -124,9 +126,16 @@ async function generateResponse(messages, sendSse) {
     //       sendSse(responseId, { botResponse });
     //     }
     //   }
+    // messages.push({
+    //   role: 'assistant',
+    //   content: `${assistantContent}`,
+    // });
+    // const conversation = messages;
+    // // console.log(messages);
+
+    // sendSse(responseId, { conversation });
 
     // res.end();
-  
   } catch (error) {
     console.log('Error:', error);
   }

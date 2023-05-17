@@ -116,26 +116,16 @@ const handleSubmit = async (e) => {
   );
 
   messageDiv.innerHTML = '';
-  // const chunks = [];
 
   source.onmessage = async function (event) {
     const end = new Date();
     console.log(`time to respond: ${(end - start)/1000} s`);
     clearInterval(loadInterval);
-    // console.log(event);
     const data = JSON.parse(event.data);
 
-    
-    // chunks.push(parsedData);
-    // console.log(`chunk: ${chunks}`);
     if (data.botResponse) {
-      // const parsedData = data.botResponse.trim();
       const parsedData = data.botResponse;
-      console.log('Received data:', parsedData);
-      // for (const chunk of chunks) {
-
-      //   typeText(messageDiv, chunk);
-      // }
+      // console.log('Received data:', parsedData);
       messageDiv.innerHTML = messageDiv.innerHTML + parsedData;
     }
 
@@ -147,10 +137,9 @@ const handleSubmit = async (e) => {
 
   source.onerror = function (err) {
     clearInterval(loadInterval);
-    // messageDiv.innerHTML = 'Something went wrong';
-    console.log(err);
+    messageDiv.innerHTML = `${err.type}`;
+    // console.log(err.type);
     source.close();
-    // alert(err);
   };
 };
 
