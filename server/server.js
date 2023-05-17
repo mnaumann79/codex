@@ -8,6 +8,7 @@ import fetch from 'node-fetch';
 import * as dotenv from 'dotenv';
 import cors from 'cors';
 import { Transform } from 'stream';
+import { resolve } from 'path';
 
 // Only for testing purposes, do not use in production
 // process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
@@ -24,8 +25,8 @@ async function generateResponse(messages, sendSse) {
         Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
       },
       body: JSON.stringify({
-        // model: 'gpt-3.5-turbo',
-        model: 'gpt-4',
+        model: 'gpt-3.5-turbo',
+        // model: 'gpt-4',
         messages: messages,
         max_tokens: 500,
         stream: true, //for the streaming purpose
@@ -43,38 +44,60 @@ async function generateResponse(messages, sendSse) {
     }
 
     const responseId = Date.now();
-    response.body
-      .pipe(new Transform({
-        transform(chunk, encoding, callback) {
-          const lines = chunk.toString().split('\n');
-          const parsedLines = lines
-            .map((line) => line.replace(/^data: /, '').trim()) // Remove the "data: " prefix
-            .filter((line) => line !== '' && line !== '[DONE]') // Remove empty lines and "[DONE]"
-            .map((line) => JSON.parse(line)); // Parse the JSON string
-          // console.log(parsedLines);
 
+    await new Promise((resolve, reject) => {
+      response.body
+        .pipe(
+          new Transform({
+            transform(chunk, encoding, callback) {
+              const lines = chunk.toString().split('\n');
+              const parsedLines = lines
+                .map((line) => line.replace(/^data: /, '').trim()) // Remove the "data: " prefix
+                .filter((line) => line !== '' && line !== '[DONE]') // Remove empty lines and "[DONE]"
+                .map((line) => JSON.parse(line)); // Parse the JSON string
+              // console.log(parsedLines);
 
-          for (const parsedLine of parsedLines) {
-            const { choices } = parsedLine;
-            const { delta } = choices[0];
-            const { content } = delta;
+              for (const parsedLine of parsedLines) {
+                const { choices } = parsedLine;
+                const { delta } = choices[0];
+                const { content } = delta;
 
-            if (content) {
-              const botResponse = content;
-              // console.log(`Content: ${botResponse}`);
-              assistantContent += botResponse;
-              sendSse(responseId, { botResponse });
-            }
-          }
-          
-          callback();
-        }
-      }))
-      .on('end', () => console.log('Response ended'))
-      .on('error', () => console.log('Error:', err));
-      
-      console.log(`assistantContent: ${assistantContent}`);
-    
+                if (content) {
+                  const botResponse = content;
+                  // console.log(`Content: ${botResponse}`);
+                  assistantContent += botResponse;
+                  sendSse(responseId, { botResponse });
+                }
+              }
+
+              callback();
+            },
+          })
+        )
+        .on('data', () => {
+          // Consume the data to trigger the 'end' event
+        })
+        .on('end', () => {
+          console.log('Response ended');
+          console.log(`Assistant: ${assistantContent}`);
+
+          messages.push({
+            role: 'assistant',
+            content: `${assistantContent}`,
+          });
+          const conversation = messages;
+          // console.log(messages);
+
+          sendSse(responseId, { conversation });
+
+          resolve();
+        })
+        .on('error', () => {
+          console.log('Error:', err);
+          reject(err);
+        });
+    });
+
     // let chunks = [];
     // for await (let chunk of response.body) {
     //   chunks.push(chunk);
@@ -89,7 +112,7 @@ async function generateResponse(messages, sendSse) {
     //   .map((line) => JSON.parse(line)); // Parse the JSON string
 
     // const responseId = Date.now();
-      
+
     //   for (const parsedLine of parsedLines) {
     //     const { choices } = parsedLine;
     //     const { delta } = choices[0];
@@ -101,17 +124,9 @@ async function generateResponse(messages, sendSse) {
     //       sendSse(responseId, { botResponse });
     //     }
     //   }
-      
-    console.log(`Assistant: ${assistantContent}`);
-    messages.push({
-      role: 'assistant',
-      content: `${assistantContent}`,
-    });
-    const conversation = messages;
-    // console.log(conversation);
-    
-    sendSse(responseId, { conversation });
+
     // res.end();
+  
   } catch (error) {
     console.log('Error:', error);
   }

@@ -125,13 +125,13 @@ const handleSubmit = async (e) => {
     // console.log(event);
     const data = JSON.parse(event.data);
 
-    // const parsedData = data.botResponse.trim();
-    const parsedData = data.botResponse;
-    console.log('Received data:', parsedData);
     
     // chunks.push(parsedData);
     // console.log(`chunk: ${chunks}`);
-    if (parsedData) {
+    if (data.botResponse) {
+      // const parsedData = data.botResponse.trim();
+      const parsedData = data.botResponse;
+      console.log('Received data:', parsedData);
       // for (const chunk of chunks) {
 
       //   typeText(messageDiv, chunk);
@@ -139,8 +139,10 @@ const handleSubmit = async (e) => {
       messageDiv.innerHTML = messageDiv.innerHTML + parsedData;
     }
 
-    conversation = data.conversation;
-    console.log(conversation);
+    if (data.conversation){
+      conversation = data.conversation;
+      console.log(conversation);
+    }
   };
 
   source.onerror = function (err) {
