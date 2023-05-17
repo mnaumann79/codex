@@ -74,6 +74,8 @@ function chatStripe(isAi, value, uniqueId) {
     `;
 }
 
+const model = 'gpt-4';
+
 let conversation = [
   {
     role: 'system',
@@ -109,17 +111,19 @@ const handleSubmit = async (e) => {
   //     data.get('prompt')
   //   )}&conversation=${encodeURIComponent(JSON.stringify(conversation))}`
   // );
+
+  console.log(model);
   const source = new EventSource(
-    `http://localhost:5000/chat?userMessage=${encodeURIComponent(
-      data.get('prompt')
-    )}&conversation=${encodeURIComponent(JSON.stringify(conversation))}`
+    `http://localhost:5000/chat?model=${encodeURIComponent(model)}
+      &userMessage=${encodeURIComponent(data.get('prompt'))}
+      &conversation=${encodeURIComponent(JSON.stringify(conversation))}`
   );
 
   messageDiv.innerHTML = '';
 
   source.onmessage = async function (event) {
     const end = new Date();
-    console.log(`time to respond: ${(end - start)/1000} s`);
+    console.log(`time to respond: ${(end - start) / 1000} s`);
     clearInterval(loadInterval);
     const data = JSON.parse(event.data);
 
@@ -129,7 +133,7 @@ const handleSubmit = async (e) => {
       messageDiv.innerHTML = messageDiv.innerHTML + parsedData;
     }
 
-    if (data.conversation){
+    if (data.conversation) {
       conversation = data.conversation;
       console.log(conversation);
     }
@@ -137,7 +141,7 @@ const handleSubmit = async (e) => {
 
   source.onerror = function (err) {
     clearInterval(loadInterval);
-    messageDiv.innerHTML = `${err.type}`;
+    // messageDiv.innerHTML = `${err.type}`;
     // console.log(err.type);
     source.close();
   };

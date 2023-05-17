@@ -9,14 +9,21 @@ import * as dotenv from 'dotenv';
 import cors from 'cors';
 import { Transform } from 'stream';
 
+import { OpenAIApi, Configuration } from 'openai';
+
+const configuration = new Configuration({ apiKey: process.env.OPENAI_API_KEY });
+const openai = new OpenAIApi(configuration);
+
 // Only for testing purposes, do not use in production
 // process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
 dotenv.config();
 // console.log(process.env.OPENAI_API_KEY);
 
-async function generateResponse(conversation, sendSse) {
+async function generateResponse(model = 'gpt-4', conversation, res) {
   try {
+    // console.log(model);
+
     const response = await fetch(process.env.OPENAI_API_URL, {
       method: 'POST',
       headers: {
@@ -36,8 +43,8 @@ async function generateResponse(conversation, sendSse) {
     const responseId = Date.now();
 
     //count the number of fetch requests since the reboot
-    count++;
-    console.log(count);
+    // count++;
+    // console.log(count);
 
     if (!response.ok) {
       throw new Error(
@@ -56,8 +63,7 @@ async function generateResponse(conversation, sendSse) {
                 .filter((line) => line !== '' && line !== '[DONE]') // Remove empty lines and "[DONE]"
                 .map((line) => JSON.parse(line)); // Parse the JSON string
               // console.log(parsedLines);
-
-              for (const parsedLine of parsedLines) {
+              parsedLines.forEach((parsedLine) => {
                 const { choices } = parsedLine;
                 const { delta } = choices[0];
                 const { content } = delta;
@@ -66,10 +72,9 @@ async function generateResponse(conversation, sendSse) {
                   const botResponse = content;
                   // console.log(`Content: ${botResponse}`);
                   assistantContent += botResponse;
-                  sendSse(responseId, { botResponse });
+                  res.write(`data: ${JSON.stringify({ botResponse })}\n\n`);
                 }
-              }
-
+              });
               callback();
             },
           })
@@ -86,7 +91,8 @@ async function generateResponse(conversation, sendSse) {
             role: 'assistant',
             content: `${assistantContent}`,
           });
-          sendSse(responseId, { conversation });
+          res.write(`data: ${JSON.stringify({ conversation })}\n\n`);
+          res.end();
           resolve();
         })
         .on('error', () => {
@@ -94,24 +100,25 @@ async function generateResponse(conversation, sendSse) {
           reject(err);
         });
     });
-
-    // res.end();
   } catch (error) {
-    console.log('Error:', error);
+    // console.log('Error:', error);
   }
 }
 
 // set up a count variable to count the number of fetch requests since the reboot
-let count = 0;
+// let count = 0;
 
 const app = express();
 app.use(cors());
 app.use(express.json());
+app.use(express.urlencoded({ extended: true })); // Add express.urlencoded() middleware
 
 app.get('/chat', async (req, res) => {
   try {
+    const model = req.query.model;
     const userMessage = req.query.userMessage;
     const conversation = JSON.parse(req.query.conversation);
+    // console.log(req.query);
 
     conversation.push({ role: 'user', content: userMessage });
 
@@ -120,15 +127,9 @@ app.get('/chat', async (req, res) => {
     res.setHeader('Cache-Control', 'no-cache');
     res.setHeader('Connection', 'keep-alive');
 
-    // Function to send a server-sent event
-    const sendSse = (id, data) => {
-      res.write(`id: ${id}\n`);
-      res.write(`data: ${JSON.stringify(data)}\n\n`);
-    };
-
-    await generateResponse(conversation, sendSse);
+    await generateResponse(model, conversation, res);
   } catch (error) {
-    console.log(error);
+    // console.log(error);
     res.status(500).send({ error });
   }
 });
