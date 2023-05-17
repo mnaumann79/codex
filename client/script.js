@@ -116,7 +116,7 @@ const handleSubmit = async (e) => {
   );
 
   messageDiv.innerHTML = '';
-  const chunks = [];
+  // const chunks = [];
 
   source.onmessage = async function (event) {
     const end = new Date();
@@ -129,18 +129,18 @@ const handleSubmit = async (e) => {
     const parsedData = data.botResponse;
     console.log('Received data:', parsedData);
     
-    chunks.push(parsedData);
-    console.log(`chunk: ${chunks}`);
+    // chunks.push(parsedData);
+    // console.log(`chunk: ${chunks}`);
     if (parsedData) {
-      for (const chunk of chunks) {
+      // for (const chunk of chunks) {
 
-        typeText(messageDiv, chunk);
-      }
-      // messageDiv.innerHTML = messageDiv.innerHTML + parsedData;
+      //   typeText(messageDiv, chunk);
+      // }
+      messageDiv.innerHTML = messageDiv.innerHTML + parsedData;
     }
 
     conversation = data.conversation;
-    // console.log(conversation);
+    console.log(conversation);
   };
 
   source.onerror = function (err) {

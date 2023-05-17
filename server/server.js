@@ -7,6 +7,7 @@ import express from 'express';
 import fetch from 'node-fetch';
 import * as dotenv from 'dotenv';
 import cors from 'cors';
+import { Transform } from 'stream';
 
 // Only for testing purposes, do not use in production
 // process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
@@ -23,13 +24,16 @@ async function generateResponse(messages, sendSse) {
         Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
       },
       body: JSON.stringify({
-        model: 'gpt-3.5-turbo',
-        // model: 'gpt-4',
+        // model: 'gpt-3.5-turbo',
+        model: 'gpt-4',
         messages: messages,
         max_tokens: 500,
         stream: true, //for the streaming purpose
       }),
     });
+
+    let assistantContent = '';
+
     count++;
     console.log(count);
     if (!response.ok) {
@@ -38,34 +42,67 @@ async function generateResponse(messages, sendSse) {
       );
     }
 
-    let chunks = [];
-    for await (let chunk of response.body) {
-      chunks.push(chunk);
-    }
-    let chunk = Buffer.concat(chunks).toString(); // Convert Buffer to string
-
-    const lines = chunk.split('\n');
-    const parsedLines = lines
-      .map((line) => line.replace(/^data: /, '').trim()) // Remove the "data: " prefix
-      .filter((line) => line !== '' && line !== '[DONE]') // Remove empty lines and "[DONE]"
-      .map((line) => JSON.parse(line)); // Parse the JSON string
-
-    let assistantContent = '';
     const responseId = Date.now();
+    response.body
+      .pipe(new Transform({
+        transform(chunk, encoding, callback) {
+          const lines = chunk.toString().split('\n');
+          const parsedLines = lines
+            .map((line) => line.replace(/^data: /, '').trim()) // Remove the "data: " prefix
+            .filter((line) => line !== '' && line !== '[DONE]') // Remove empty lines and "[DONE]"
+            .map((line) => JSON.parse(line)); // Parse the JSON string
+          // console.log(parsedLines);
 
-    for (const parsedLine of parsedLines) {
-      const { choices } = parsedLine;
-      const { delta } = choices[0];
-      const { content } = delta;
-      if (content) {
-        const botResponse = content;
-        // console.log(`Content: ${botResponse}`);
-        assistantContent += botResponse;
-        sendSse(responseId, { botResponse });
-      }
-    }
 
-    // console.log(assistantContent);
+          for (const parsedLine of parsedLines) {
+            const { choices } = parsedLine;
+            const { delta } = choices[0];
+            const { content } = delta;
+
+            if (content) {
+              const botResponse = content;
+              // console.log(`Content: ${botResponse}`);
+              assistantContent += botResponse;
+              sendSse(responseId, { botResponse });
+            }
+          }
+          
+          callback();
+        }
+      }))
+      .on('end', () => console.log('Response ended'))
+      .on('error', () => console.log('Error:', err));
+      
+      console.log(`assistantContent: ${assistantContent}`);
+    
+    // let chunks = [];
+    // for await (let chunk of response.body) {
+    //   chunks.push(chunk);
+    // }
+    // let chunk = Buffer.concat(chunks).toString(); // Convert Buffer to string
+
+    // // console.log(chunk);
+    // const lines = chunk.split('\n');
+    // const parsedLines = lines
+    //   .map((line) => line.replace(/^data: /, '').trim()) // Remove the "data: " prefix
+    //   .filter((line) => line !== '' && line !== '[DONE]') // Remove empty lines and "[DONE]"
+    //   .map((line) => JSON.parse(line)); // Parse the JSON string
+
+    // const responseId = Date.now();
+      
+    //   for (const parsedLine of parsedLines) {
+    //     const { choices } = parsedLine;
+    //     const { delta } = choices[0];
+    //     const { content } = delta;
+    //     if (content) {
+    //       const botResponse = content;
+    //       // console.log(`Content: ${botResponse}`);
+    //       // assistantContent += botResponse;
+    //       sendSse(responseId, { botResponse });
+    //     }
+    //   }
+      
+    console.log(`Assistant: ${assistantContent}`);
     messages.push({
       role: 'assistant',
       content: `${assistantContent}`,
