@@ -114,10 +114,16 @@ const handleSubmit = async (e) => {
 
   console.log(model);
   const source = new EventSource(
-    `http://localhost:5000/chat?model=${encodeURIComponent(model)}
+    `http://codex-nk5p.onrender.com/chat?model=${encodeURIComponent(model)}
       &userMessage=${encodeURIComponent(data.get('prompt'))}
       &conversation=${encodeURIComponent(JSON.stringify(conversation))}`
   );
+  
+//   const source = new EventSource(
+//     `http://localhost:5000/chat?model=${encodeURIComponent(model)}
+//       &userMessage=${encodeURIComponent(data.get('prompt'))}
+//       &conversation=${encodeURIComponent(JSON.stringify(conversation))}`
+//   );
 
   messageDiv.innerHTML = '';
 
