@@ -9,21 +9,24 @@ import * as dotenv from 'dotenv';
 import cors from 'cors';
 import { Transform } from 'stream';
 
-import { OpenAIApi, Configuration } from 'openai';
+// import { OpenAIApi, Configuration } from 'openai';
 
-const configuration = new Configuration({ apiKey: process.env.OPENAI_API_KEY });
-const openai = new OpenAIApi(configuration);
+// const configuration = new Configuration({ apiKey: process.env.OPENAI_API_KEY });
+// const openai = new OpenAIApi(configuration);
 
 // Only for testing purposes, do not use in production
 // process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
 dotenv.config();
-// console.log(process.env.OPENAI_API_KEY);
+// console.log(process.env.OPENAI_API_URL);
 
-async function generateResponse(model = 'gpt-4', conversation, res) {
+async function generateResponse(model, conversation, res) {
   try {
-    // console.log(model);
+    console.log(model);
 
+    // const response = {};
+    // switch (model) {
+    //   case 'gpt-4':
     const response = await fetch(process.env.OPENAI_API_URL, {
       method: 'POST',
       headers: {
@@ -38,13 +41,15 @@ async function generateResponse(model = 'gpt-4', conversation, res) {
         stream: true, //for the streaming purpose
       }),
     });
-
+    // break;
+    // }
+    console.log(response);
     let assistantContent = '';
     const responseId = Date.now();
 
     //count the number of fetch requests since the reboot
-    count++;
-    console.log(count);
+    // count++;
+    // console.log(count);
 
     if (!response.ok) {
       throw new Error(
