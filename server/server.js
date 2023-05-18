@@ -24,6 +24,21 @@ async function generateResponse(model, conversation, res) {
   try {
     // console.log(model);
 
+    // const response = await fetch(process.env.OPENAI_API_URL, {
+    //   method: 'POST',
+    //   headers: {
+    //     'Content-Type': 'application/json',
+    //     Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+    //   },
+    //   body: JSON.stringify({
+    //     model: 'gpt-3.5-turbo',
+    //     // model: 'gpt-4',
+    //     messages: conversation,
+    //     max_tokens: 500,
+    //     stream: true, //for the streaming purpose
+    //   }),
+    // });
+
     const response = await fetch(process.env.OPENAI_API_URL, {
       method: 'POST',
       headers: {
