@@ -104,20 +104,19 @@ const handleSubmit = async (e) => {
   const messageDiv = document.getElementById(uniqueId);
 
   // loader(messageDiv);
+  // console.log(model);
 
-  // Create an EventSource instance to open a streaming connection
-  //   const source = new EventSource(
-  //   `https://codex-nk5p.onrender.com/chat?userMessage=${encodeURIComponent(
-  //     data.get('prompt')
-  //   )}&conversation=${encodeURIComponent(JSON.stringify(conversation))}`
-  // );
-
-  console.log(model);
   const source = new EventSource(
-    `http://localhost:5000/chat?model=${encodeURIComponent(model)}
+    `https://codex-nk5p.onrender.com/chat?model=${encodeURIComponent(model)}
       &userMessage=${encodeURIComponent(data.get('prompt'))}
       &conversation=${encodeURIComponent(JSON.stringify(conversation))}`
   );
+  
+  // const source = new EventSource(
+  //   `http://localhost:5000/chat?model=${encodeURIComponent(model)}
+  //     &userMessage=${encodeURIComponent(data.get('prompt'))}
+  //     &conversation=${encodeURIComponent(JSON.stringify(conversation))}`
+  // );
 
   messageDiv.innerHTML = '';
 
