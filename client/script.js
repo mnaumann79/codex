@@ -84,6 +84,34 @@ let conversation = [
   },
 ];
 
+const sendInitialData = async () => {
+  // console.log(`the document was reloaded`);
+  const initialData = {
+    conversation: conversation, // Include the conversation array here
+    model: model, // Include the model name here
+  };
+
+  const requestOptions = {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(initialData),
+  };
+
+  try {
+    const response = await fetch('http://localhost:5000/initial-data', requestOptions);
+    if (response.ok) {
+      console.log('Initial data sent successfully');
+      // Handle success scenario
+    } else {
+      console.error('Error sending initial data:', response.status);
+      // Handle error scenario
+    }
+  } catch (error) {
+    console.error('Error sending initial data:', error);
+    // Handle error scenario
+  }
+};
+
 const handleSubmit = async (e) => {
   e.preventDefault();
   const start = new Date();
@@ -106,17 +134,22 @@ const handleSubmit = async (e) => {
   // loader(messageDiv);
   // console.log(model);
 
-  const source = new EventSource(
-    `https://codex-nk5p.onrender.com/chat?model=${encodeURIComponent(model)}
-      &userMessage=${encodeURIComponent(data.get('prompt'))}
-      &conversation=${encodeURIComponent(JSON.stringify(conversation))}`
-  );
+  // const source = new EventSource(
+  //   `https://codex-nk5p.onrender.com/chat?model=${encodeURIComponent(model)}
+  //     &userMessage=${encodeURIComponent(data.get('prompt'))}
+  //     &conversation=${encodeURIComponent(JSON.stringify(conversation))}`
+  // );
 
   // const source = new EventSource(
   //   `http://localhost:5000/chat?model=${encodeURIComponent(model)}
   //     &userMessage=${encodeURIComponent(data.get('prompt'))}
   //     &conversation=${encodeURIComponent(JSON.stringify(conversation))}`
   // );
+
+  const source = new EventSource(
+    `http://localhost:5000/chat?model=${encodeURIComponent(model)}
+      &userMessage=${encodeURIComponent(data.get('prompt'))}`
+  );
 
   messageDiv.innerHTML = '';
 
@@ -145,6 +178,8 @@ const handleSubmit = async (e) => {
     source.close();
   };
 };
+
+document.addEventListener('DOMContentLoaded', sendInitialData);
 
 form.addEventListener('submit', handleSubmit);
 form.addEventListener('keyup', (e) => {
