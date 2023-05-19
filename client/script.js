@@ -98,7 +98,10 @@ const sendInitialData = async () => {
   };
 
   try {
-    const response = await fetch('http://localhost:5000/initial-data', requestOptions);
+    const response = await fetch(
+      'https://codex-nk5p.onrender.com/initial-data',
+      requestOptions
+    );
     if (response.ok) {
       console.log('Initial data sent successfully');
       // Handle success scenario
@@ -134,11 +137,10 @@ const handleSubmit = async (e) => {
   // loader(messageDiv);
   // console.log(model);
 
-  // const source = new EventSource(
-  //   `https://codex-nk5p.onrender.com/chat?model=${encodeURIComponent(model)}
-  //     &userMessage=${encodeURIComponent(data.get('prompt'))}
-  //     &conversation=${encodeURIComponent(JSON.stringify(conversation))}`
-  // );
+  const source = new EventSource(
+    `https://codex-nk5p.onrender.com/chat?model=${encodeURIComponent(model)}
+      &userMessage=${encodeURIComponent(data.get('prompt'))}`
+  );
 
   // const source = new EventSource(
   //   `http://localhost:5000/chat?model=${encodeURIComponent(model)}
@@ -146,10 +148,10 @@ const handleSubmit = async (e) => {
   //     &conversation=${encodeURIComponent(JSON.stringify(conversation))}`
   // );
 
-  const source = new EventSource(
-    `http://localhost:5000/chat?model=${encodeURIComponent(model)}
-      &userMessage=${encodeURIComponent(data.get('prompt'))}`
-  );
+  // const source = new EventSource(
+  //   `http://localhost:5000/chat?model=${encodeURIComponent(model)}
+  //     &userMessage=${encodeURIComponent(data.get('prompt'))}`
+  // );
 
   messageDiv.innerHTML = '';
 
