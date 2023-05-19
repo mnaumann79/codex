@@ -96,7 +96,8 @@ async function generateResponse(model, conversation, res) {
             role: 'assistant',
             content: `${assistantContent}`,
           });
-          res.write(`data: ${JSON.stringify({ conversation })}\n\n`);
+          // console.log(conversation)
+          // res.write(`data: ${JSON.stringify({ conversation })}\n\n`);
           res.end();
           resolve();
         })
@@ -116,13 +117,29 @@ async function generateResponse(model, conversation, res) {
 const app = express();
 app.use(cors());
 app.use(express.json());
+// app.use(bodyParser.json());
 app.use(express.urlencoded({ extended: true })); // Add express.urlencoded() middleware
+
+let conversation = [];
+let model = [];
+
+app.post('/initial-data', function (req, res) {
+  const data = req.body; // Access the sent data
+  conversation = data.conversation;
+  model = data.model;
+  console.log(conversation);
+  // Process the data and perform necessary operations
+
+  // Send a response back if needed
+  // res.send('Data received successfully');
+  res.sendStatus(200);
+});
 
 app.get('/chat', async (req, res) => {
   try {
     const model = req.query.model;
     const userMessage = req.query.userMessage;
-    const conversation = JSON.parse(req.query.conversation);
+    // const conversation = JSON.parse(req.query.conversation);
     // console.log(req.query);
 
     conversation.push({ role: 'user', content: userMessage });
@@ -133,6 +150,7 @@ app.get('/chat', async (req, res) => {
     res.setHeader('Connection', 'keep-alive');
 
     await generateResponse(model, conversation, res);
+    console.log(conversation);
   } catch (error) {
     // console.log(error);
     res.status(500).send({ error });
