@@ -111,7 +111,7 @@ const handleSubmit = async (e) => {
       &userMessage=${encodeURIComponent(data.get('prompt'))}
       &conversation=${encodeURIComponent(JSON.stringify(conversation))}`
   );
-  
+
   // const source = new EventSource(
   //   `http://localhost:5000/chat?model=${encodeURIComponent(model)}
   //     &userMessage=${encodeURIComponent(data.get('prompt'))}

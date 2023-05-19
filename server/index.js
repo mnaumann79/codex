@@ -23,6 +23,10 @@ dotenv.config();
 async function generateResponse(model, conversation, res) {
   try {
     // console.log(model);
+
+    // const response = {};
+    // switch (model) {
+    //   case 'gpt-4':
     const response = await fetch(process.env.OPENAI_API_URL, {
       method: 'POST',
       headers: {
@@ -30,14 +34,16 @@ async function generateResponse(model, conversation, res) {
         Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
       },
       body: JSON.stringify({
-        model: 'gpt-3.5-turbo',
-        // model: 'gpt-4',
+        // model: 'gpt-3.5-turbo',
+        model: 'gpt-4',
         messages: conversation,
         max_tokens: 500,
         stream: true, //for the streaming purpose
       }),
     });
-
+    // break;
+    // }
+    // console.log(response);
     let assistantContent = '';
     const responseId = Date.now();
 
