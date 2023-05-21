@@ -16,6 +16,20 @@ const chatContainer = document.querySelector('#chat_container');
 
 let loadInterval;
 
+const model = 'gpt-4';
+
+let conversation = [
+  {
+    role: 'system',
+    content:
+      'The following is a conversation with an AI assistant named Winston. The assistant is helpful, creative, clever, and very friendly. The assistant uses markdown output whenever possible.\n',
+  },
+];
+
+// const serverUrl = 'http://localhost:5000';
+const serverUrl = 'https://mushy-crab-khakis.cyclic.app';
+// const serverUrl = 'https://codex-nk5p.onrender.com';
+
 function loader(element) {
   // '...'
   element.textContent = "I'm thinking";
@@ -74,15 +88,6 @@ function chatStripe(isAi, value, uniqueId) {
     `;
 }
 
-const model = 'gpt-4';
-
-let conversation = [
-  {
-    role: 'system',
-    content:
-      'The following is a conversation with an AI assistant named Winston. The assistant is helpful, creative, clever, and very friendly. The assistant uses markdown output whenever possible.\n',
-  },
-];
 
 const sendInitialData = async () => {
   // console.log(`the document was reloaded`);
@@ -99,7 +104,9 @@ const sendInitialData = async () => {
 
   try {
     const response = await fetch(
-      'https://codex-nk5p.onrender.com/initial-data',
+      // 'https://mushy-crab-khakis.cyclic.app/initial-data',
+      // 'http://localhost:5000/initial-data',
+      `${serverUrl}/initial-data`,
       requestOptions
     );
     if (response.ok) {
@@ -137,10 +144,17 @@ const handleSubmit = async (e) => {
   // loader(messageDiv);
   // console.log(model);
 
-  const source = new EventSource(
-    `https://codex-nk5p.onrender.com/chat?model=${encodeURIComponent(model)}
-      &userMessage=${encodeURIComponent(data.get('prompt'))}`
-  );
+  // const source = new EventSource(
+  //   `https://mushy-crab-khakis.cyclic.app/chat?model=${encodeURIComponent(
+  //     model
+  //   )}
+  //     &userMessage=${encodeURIComponent(data.get('prompt'))}`
+  // );
+
+  // const source = new EventSource(
+  //   `https://codex-nk5p.onrender.com/chat?model=${encodeURIComponent(model)}
+  //     &userMessage=${encodeURIComponent(data.get('prompt'))}`
+  // );
 
   // const source = new EventSource(
   //   `http://localhost:5000/chat?model=${encodeURIComponent(model)}
@@ -148,10 +162,10 @@ const handleSubmit = async (e) => {
   //     &conversation=${encodeURIComponent(JSON.stringify(conversation))}`
   // );
 
-  // const source = new EventSource(
-  //   `http://localhost:5000/chat?model=${encodeURIComponent(model)}
-  //     &userMessage=${encodeURIComponent(data.get('prompt'))}`
-  // );
+  const source = new EventSource(
+    `${serverUrl}/chat?model=${encodeURIComponent(model)}
+      &userMessage=${encodeURIComponent(data.get('prompt'))}`
+  );
 
   messageDiv.innerHTML = '';
 
