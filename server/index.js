@@ -127,7 +127,7 @@ app.post('/initial-data', function (req, res) {
   const data = req.body; // Access the sent data
   conversation = data.conversation;
   model = data.model;
-  console.log(conversation);
+  // console.log(conversation);
   // Process the data and perform necessary operations
 
   // Send a response back if needed
