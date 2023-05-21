@@ -27,8 +27,8 @@ let conversation = [
 ];
 
 // const serverUrl = 'http://localhost:5000';
-const serverUrl = 'https://mushy-crab-khakis.cyclic.app';
-// const serverUrl = 'https://codex-nk5p.onrender.com';
+// const serverUrl = 'https://mushy-crab-khakis.cyclic.app';
+const serverUrl = 'https://codex-nk5p.onrender.com';
 
 function loader(element) {
   // '...'
@@ -87,7 +87,6 @@ function chatStripe(isAi, value, uniqueId) {
       </div>
     `;
 }
-
 
 const sendInitialData = async () => {
   // console.log(`the document was reloaded`);
