@@ -120,6 +120,14 @@ app.use(express.json());
 // app.use(bodyParser.json());
 app.use(express.urlencoded({ extended: true })); // Add express.urlencoded() middleware
 
+// Add the following middleware to handle CORS
+app.use((req, res, next) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  next();
+});
+
 let conversation = [];
 let model = [];
 
