@@ -75,7 +75,7 @@ async function generateResponse(model, conversation, res) {
 
                 if (content) {
                   const botResponse = content;
-                  console.log(`Content: ${botResponse}`);
+                  // console.log(`Content: ${botResponse}`);
                   assistantContent += botResponse;
                   res.write(`data: ${JSON.stringify({ botResponse })}\n\n`);
                 }
