@@ -75,7 +75,7 @@ async function generateResponse(model, conversation, res) {
 
                 if (content) {
                   const botResponse = content;
-                  // console.log(`Content: ${botResponse}`);
+                  console.log(`Content: ${botResponse}`);
                   assistantContent += botResponse;
                   res.write(`data: ${JSON.stringify({ botResponse })}\n\n`);
                 }
@@ -158,7 +158,7 @@ app.get('/chat', async (req, res) => {
     res.setHeader('Connection', 'keep-alive');
 
     await generateResponse(model, conversation, res);
-    console.log(conversation);
+    // console.log(conversation);
   } catch (error) {
     // console.log(error);
     res.status(500).send({ error });
