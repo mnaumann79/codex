@@ -76,6 +76,8 @@ async function generateResponse(model, conversation, res) {
                 if (content) {
                   const botResponse = content;
                   // console.log(`Content: ${botResponse}`);
+                  const endTime = Date.now();
+                  console.log(`That took ${(endTime - responseId) / 1000} s: ${botResponse}`);
                   assistantContent += botResponse;
                   res.write(`data: ${JSON.stringify({ botResponse })}\n\n`);
                 }
@@ -89,8 +91,6 @@ async function generateResponse(model, conversation, res) {
         })
         .on('end', () => {
           // check the time for the response
-          // const endTime = Date.now();
-          // console.log(`That took ${(endTime - responseId) / 1000} s`);
 
           conversation.push({
             role: 'assistant',
