@@ -27,8 +27,9 @@ let conversation = [
 ];
 
 // const serverUrl = 'http://localhost:5000';
-const serverUrl = 'https://mushy-crab-khakis.cyclic.app';
-// const serverUrl = 'https://codex-nk5p.onrender.com';
+// const serverUrl = 'https://codexbackend-1-z0677692.deta.app';
+// const serverUrl = 'https://tiny-blue-elephant-ring.cyclic.app';
+const serverUrl = 'https://codex-nk5p.onrender.com';
 
 function loader(element) {
   // '...'

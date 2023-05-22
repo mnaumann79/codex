@@ -45,7 +45,7 @@ async function generateResponse(model, conversation, res) {
     // }
     // console.log(response);
     let assistantContent = '';
-    const responseId = Date.now();
+    // const responseId = Date.now();
 
     //count the number of fetch requests since the reboot
     // count++;
@@ -76,8 +76,8 @@ async function generateResponse(model, conversation, res) {
                 if (content) {
                   const botResponse = content;
                   // console.log(`Content: ${botResponse}`);
-                  const endTime = Date.now();
-                  console.log(`That took ${(endTime - responseId) / 1000} s: ${botResponse}`);
+                  // const endTime = Date.now();
+                  // console.log(`That took ${(endTime - responseId) / 1000} s: ${botResponse}`);
                   assistantContent += botResponse;
                   res.write(`data: ${JSON.stringify({ botResponse })}\n\n`);
                 }
