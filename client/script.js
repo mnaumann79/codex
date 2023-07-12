@@ -144,24 +144,6 @@ const handleSubmit = async (e) => {
   // loader(messageDiv);
   // console.log(model);
 
-  // const source = new EventSource(
-  //   `https://mushy-crab-khakis.cyclic.app/chat?model=${encodeURIComponent(
-  //     model
-  //   )}
-  //     &userMessage=${encodeURIComponent(data.get('prompt'))}`
-  // );
-
-  // const source = new EventSource(
-  //   `https://codex-nk5p.onrender.com/chat?model=${encodeURIComponent(model)}
-  //     &userMessage=${encodeURIComponent(data.get('prompt'))}`
-  // );
-
-  // const source = new EventSource(
-  //   `http://localhost:5000/chat?model=${encodeURIComponent(model)}
-  //     &userMessage=${encodeURIComponent(data.get('prompt'))}
-  //     &conversation=${encodeURIComponent(JSON.stringify(conversation))}`
-  // );
-
   const source = new EventSource(
     `${serverUrl}/chat?model=${encodeURIComponent(model)}
       &userMessage=${encodeURIComponent(data.get('prompt'))}`
@@ -183,7 +165,7 @@ const handleSubmit = async (e) => {
 
     if (data.conversation) {
       conversation = data.conversation;
-      console.log(conversation);
+      console.log(conversation[0]);
     }
   };
 
