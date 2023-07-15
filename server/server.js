@@ -8,6 +8,7 @@ import fetch from 'node-fetch';
 import * as dotenv from 'dotenv';
 import cors from 'cors';
 import { Transform } from 'stream';
+import { log } from 'console';
 
 // import { OpenAIApi, Configuration } from 'openai';
 
@@ -20,7 +21,7 @@ import { Transform } from 'stream';
 dotenv.config();
 // console.log(process.env.OPENAI_API_URL);
 
-async function generateResponse(model, conversation, res) {
+const generateResponse = async (model, conversation, res) => {
   try {
     // console.log(model);
 
@@ -41,15 +42,9 @@ async function generateResponse(model, conversation, res) {
         stream: true, //for the streaming purpose
       }),
     });
-    // break;
-    // }
-    // console.log(response);
+
     let assistantContent = '';
     // const responseId = Date.now();
-
-    //count the number of fetch requests since the reboot
-    // count++;
-    // console.log(count);
 
     if (!response.ok) {
       throw new Error(
@@ -109,7 +104,7 @@ async function generateResponse(model, conversation, res) {
   } catch (error) {
     // console.log('Error:', error);
   }
-}
+};
 
 // set up a count variable to count the number of fetch requests since the reboot
 // let count = 0;
@@ -128,42 +123,114 @@ app.use((req, res, next) => {
   next();
 });
 
-let conversation = [];
+const conversation = [];
 let model = [];
 
-app.post('/initial-data', function (req, res) {
-  const data = req.body; // Access the sent data
-  conversation = data.conversation;
-  model = data.model;
-  // console.log(conversation);
-  // Process the data and perform necessary operations
-
-  // Send a response back if needed
-  // res.send('Data received successfully');
-  res.sendStatus(200);
-});
-
-app.get('/chat', async (req, res) => {
+app.post('/initial-data', async (req, res) => {
   try {
-    const model = req.query.model;
-    const userMessage = req.query.userMessage;
-    // const conversation = JSON.parse(req.query.conversation);
-    // console.log(req.query);
+    const data = req.body; // Access the sent data
+    conversation.push(...data.conversation);
+    model = data.model;
+    console.log(typeof(model));
+    // Process the data and perform necessary operations
 
-    conversation.push({ role: 'user', content: userMessage });
-
-    // Set headers for SSE
-    res.setHeader('Content-Type', 'text/event-stream');
-    res.setHeader('Cache-Control', 'no-cache');
-    res.setHeader('Connection', 'keep-alive');
-
-    await generateResponse(model, conversation, res);
-    // console.log(conversation);
-  } catch (error) {
-    // console.log(error);
-    res.status(500).send({ error });
+    // Send a response back if needed
+    // res.send('Data received successfully');
+    res.sendStatus(200);
+  } catch (err) {
+    console.log(err.message);
   }
 });
+
+app.post('/chat', async (req, res) => {
+  try {
+    const response = await fetch(process.env.OPENAI_API_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+      },
+      body: JSON.stringify({
+        // model: 'gpt-3.5-turbo',
+        model: model,
+        messages: conversation,
+        max_tokens: 100,
+        stream: true, //for the streaming purpose
+      }),
+    });
+
+    if (!response.ok) {
+      // if the request was not successful, parse the error
+      const error = await response.json();
+
+      // log the error for debugging purposes
+      console.error('OpenAI API Error:', error);
+
+      // return an error response to the client
+      return res.json({ status: 'error', data: null });
+    }
+
+    let chunks = [];
+    for await (let chunk of response.body) {
+      chunks.push(chunk);
+    }
+
+    let chunk = Buffer.concat(chunks).toString(); // Convert Buffer to string
+
+    // console.log(chunk);
+    const lines = chunk.split('\n');
+    const parsedLines = lines
+      .map((line) => line.replace(/^data: /, '').trim()) // Remove the "data: " prefix
+      .filter((line) => line !== '' && line !== '[DONE]') // Remove empty lines and "[DONE]"
+      .map((line) => JSON.parse(line)); // Parse the JSON string
+
+    // const responseId = Date.now();
+    let assistantContent = [];
+
+    for (const parsedLine of parsedLines) {
+      const { choices } = parsedLine;
+      const { delta } = choices[0];
+      const { content } = delta;
+      if (content) {
+        const botResponse = content;
+        // console.log(`Content: ${botResponse}`);
+        assistantContent.push(botResponse);
+      }
+    }
+    console.log(assistantContent);
+    // const data = await response.json();
+    // const answer = data?.choices?.[0]?.message?.content;
+    // // console.log(res.json({ status: 'success', data: answer }));
+    // return res.json({ status: 'success', data: answer });
+    // res.sendStatus();
+  } catch (err) {
+    console.log('an error was caught');
+  }
+});
+
+// app.post('/chat', async (req, res) => {
+//   try {
+//     const model = req.query.model;
+//     const userMessage = req.query.userMessage;
+//     // const conversation = JSON.parse(req.query.conversation);
+//     // console.log(req.query);
+//     // console.log(userMessage);
+
+//     conversation.push({ role: 'user', content: userMessage });
+
+//     // Set headers for SSE
+//     res.setHeader('Content-Type', 'text/event-stream');
+//     res.setHeader('Cache-Control', 'no-cache');
+//     res.setHeader('Connection', 'keep-alive');
+//     console.log(conversation);
+
+//     await generateResponse(model, conversation, res);
+//     // console.log(conversation);
+//   } catch (error) {
+//     // console.log(error);
+//     res.status(500).send({ error });
+//   }
+// });
 
 app.listen(5000, () => {
   console.log('Server is listening');
