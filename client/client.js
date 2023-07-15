@@ -26,10 +26,10 @@ let conversation = [
   },
 ];
 
-// const serverUrl = 'http://localhost:5000';
+const serverUrl = 'http://localhost:5000';
 // const serverUrl = 'https://codexbackend-1-z0677692.deta.app';
 // const serverUrl = 'https://tiny-blue-elephant-ring.cyclic.app';
-const serverUrl = 'https://codex-nk5p.onrender.com';
+// const serverUrl = 'https://codex-nk5p.onrender.com';
 
 function loader(element) {
   // '...'
@@ -110,14 +110,14 @@ const sendInitialData = async () => {
       requestOptions
     );
     if (response.ok) {
-      console.log('Initial data sent successfully');
+      console.log(response.statusText);
       // Handle success scenario
     } else {
       console.error('Error sending initial data:', response.status);
       // Handle error scenario
     }
   } catch (error) {
-    console.error('Error sending initial data:', error);
+    console.error('Caught error sending initial data:', error);
     // Handle error scenario
   }
 };
@@ -143,38 +143,23 @@ const handleSubmit = async (e) => {
 
   // loader(messageDiv);
   // console.log(model);
-
-  const source = new EventSource(
-    `${serverUrl}/chat?model=${encodeURIComponent(model)}
-      &userMessage=${encodeURIComponent(data.get('prompt'))}`
-  );
-
   messageDiv.innerHTML = '';
-
-  source.onmessage = async function (event) {
-    const end = new Date();
-    console.log(`time to respond: ${(end - start) / 1000} s`);
-    clearInterval(loadInterval);
-    const data = JSON.parse(event.data);
-
-    if (data.botResponse) {
-      const parsedData = data.botResponse;
-      // console.log('Received data:', parsedData);
-      messageDiv.innerHTML = messageDiv.innerHTML + parsedData;
-    }
-
-    if (data.conversation) {
-      conversation = data.conversation;
-      console.log(conversation[0]);
-    }
-  };
-
-  source.onerror = function (err) {
-    clearInterval(loadInterval);
-    // messageDiv.innerHTML = `${err.type}`;
-    // console.log(err.type);
-    source.close();
-  };
+  
+  const response = await fetch(`${serverUrl}/chat`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(conversation),
+  });
+  
+  if (!response.ok) {
+    throw new Error(`Server responded with status code ${response.status}`);
+  }
+  const answer = await response.json();
+  console.log(answer);
+  const botAnswer = answer.data;
+  messageDiv.innerHTML = botAnswer;
 };
 
 document.addEventListener('DOMContentLoaded', sendInitialData);

@@ -72,3 +72,36 @@ You can include the marked library in your HTML file by adding the following scr
 ```
 
 This will load the latest version of the marked library from the jsDelivr CDN. You can also download the library and host it locally if you prefer.
+
+```js
+  // const source = new EventSource(
+  //   `${serverUrl}/chat?model=${encodeURIComponent(model)}
+  //     &userMessage=${encodeURIComponent(data.get('prompt'))}`
+  // );
+
+
+  // source.onmessage = async function (event) {
+  //   const end = new Date();
+  //   console.log(`time to respond: ${(end - start) / 1000} s`);
+  //   clearInterval(loadInterval);
+  //   const data = JSON.parse(event.data);
+
+  //   if (data.botResponse) {
+  //     const parsedData = data.botResponse;
+  //     // console.log('Received data:', parsedData);
+  //     messageDiv.innerHTML = messageDiv.innerHTML + parsedData;
+  //   }
+
+  //   if (data.conversation) {
+  //     conversation = data.conversation;
+  //     console.log(conversation[0]);
+  //   }
+  // };
+
+  // source.onerror = function (err) {
+  //   clearInterval(loadInterval);
+  //   messageDiv.innerHTML = `Fehler: nix empfangen`;
+  //   // console.log(err.type);
+  //   source.close();
+  // };
+  ```
