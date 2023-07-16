@@ -82,3 +82,97 @@ Here's what you can do to debug this issue:
       stream: true,
     });
     ```
+
+    ```js
+    const generateResponse = async (model, conversation, res) => {
+  try {
+    // console.log(model);
+
+    // const response = {};
+    // switch (model) {
+    //   case 'gpt-4':
+    const response = await fetch(process.env.OPENAI_API_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+      },
+      body: JSON.stringify({
+        // model: 'gpt-3.5-turbo',
+        model: 'gpt-4',
+        messages: conversation,
+        max_tokens: 500,
+        stream: true, //for the streaming purpose
+      }),
+    });
+
+    let assistantContent = '';
+    // const responseId = Date.now();
+
+    if (!response.ok) {
+      throw new Error(
+        `OpenAI API responded with status code ${response.status}`
+      );
+    }
+
+    await new Promise((resolve, reject) => {
+      response.body
+        .pipe(
+          new Transform({
+            transform(chunk, encoding, callback) {
+              const lines = chunk.toString().split('\n');
+              const parsedLines = lines
+                .map((line) => line.replace(/^data: /, '').trim()) // Remove the "data: " prefix
+                .filter((line) => line !== '' && line !== '[DONE]') // Remove empty lines and "[DONE]"
+                .map((line) => JSON.parse(line)); // Parse the JSON string
+              // console.log(parsedLines);
+              parsedLines.forEach((parsedLine) => {
+                const { choices } = parsedLine;
+                const { delta } = choices[0];
+                const { content } = delta;
+
+                if (content) {
+                  const botResponse = content;
+                  // console.log(`Content: ${botResponse}`);
+                  // const endTime = Date.now();
+                  // console.log(`That took ${(endTime - responseId) / 1000} s: ${botResponse}`);
+                  assistantContent += botResponse;
+                  res.write(`data: ${JSON.stringify({ botResponse })}\n\n`);
+                }
+              });
+              callback();
+            },
+          })
+        )
+        .on('data', () => {
+          // Consume the data to trigger the 'end' event
+        })
+        .on('end', () => {
+          // check the time for the response
+
+          conversation.push({
+            role: 'assistant',
+            content: `${assistantContent}`,
+          });
+          // console.log(conversation)
+          // res.write(`data: ${JSON.stringify({ conversation })}\n\n`);
+          res.end();
+          resolve();
+        })
+        .on('error', () => {
+          console.log('Error:', err);
+          reject(err);
+        });
+    });
+  } catch (error) {
+    // console.log('Error:', error);
+  }
+};
+```
+
+```js
+// import { OpenAIApi, Configuration } from 'openai';
+
+// const configuration = new Configuration({ apiKey: process.env.OPENAI_API_KEY });
+// const openai = new OpenAIApi(configuration);
+```

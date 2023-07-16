@@ -5,10 +5,11 @@ https://codex-self.vercel.app/
 import bot from './assets/bot.svg';
 import user from './assets/user.svg';
 // import bot from './assets/bot.svg'
-
+// const { v4: uuid } = require('uuid');
+import { v4 as uuid } from 'uuid';
 import * as marked from 'marked';
 import MarkdownIt from 'markdown-it';
-
+// console.log(uuid());
 const md = new MarkdownIt();
 
 const form = document.querySelector('form');
@@ -18,7 +19,7 @@ let loadInterval;
 
 const model = 'gpt-4';
 
-let conversation = [
+let conversation = JSON.parse(localStorage.getItem('conversation')) || [
   {
     role: 'system',
     content:
@@ -44,35 +45,12 @@ function loader(element) {
   }, 300);
 }
 
-function typeText(element, text) {
-  let index = 0;
-
-  // let markdownText = md.render(text);
-  // console.log(markdownText);
-
-  let interval = setInterval(() => {
-    if (index < text.length) {
-      element.innerHTML += text.charAt(index);
-      index++;
-    } else {
-      clearInterval(interval);
-    }
-  }, 20);
-}
-
-function generateUniqueId() {
-  const timestamp = Date.now();
-  const randomNumber = Math.random();
-  const hexadecimalString = randomNumber.toString(16);
-
-  return `id-${timestamp}-${hexadecimalString}`;
-}
-
-function chatStripe(isAi, value, uniqueId) {
+const chatStripe = (isAi, value, uniqueId) => {
   // const markdownValue = md.render(value);
   // console.log(markdownValue);
   // const markdownValue = value;
   // const sanitizedValue = DOMPurify.sanitize(markdownValue);
+  const dateTime = new Date().toISOString;
 
   return `    
       <div class="wrapper ${isAi && 'ai'}">
@@ -87,86 +65,103 @@ function chatStripe(isAi, value, uniqueId) {
         </div>
       </div>
     `;
-}
-
-const sendInitialData = async () => {
-  // console.log(`the document was reloaded`);
-  const initialData = {
-    conversation: conversation, // Include the conversation array here
-    model: model, // Include the model name here
-  };
-
-  const requestOptions = {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(initialData),
-  };
-
-  try {
-    const response = await fetch(
-      // 'https://mushy-crab-khakis.cyclic.app/initial-data',
-      // 'http://localhost:5000/initial-data',
-      `${serverUrl}/initial-data`,
-      requestOptions
-    );
-    if (response.ok) {
-      console.log(response.statusText);
-      // Handle success scenario
-    } else {
-      console.error('Error sending initial data:', response.status);
-      // Handle error scenario
-    }
-  } catch (error) {
-    console.error('Caught error sending initial data:', error);
-    // Handle error scenario
-  }
 };
 
 const handleSubmit = async (e) => {
   e.preventDefault();
-  const start = new Date();
+  conversation.push({ role: 'user', content: e.target.value });
+
+  // const start = new Date();
 
   const data = new FormData(form);
 
   //user's chatstrip
   chatContainer.innerHTML += chatStripe(false, data.get('prompt'));
-
   form.reset();
 
   //bot's chatstripe
-  const uniqueId = generateUniqueId();
+  const uniqueId = uuid();
   chatContainer.innerHTML += chatStripe(true, ' ', uniqueId);
-
   chatContainer.scrollTop = chatContainer.scrollHeight;
 
   const messageDiv = document.getElementById(uniqueId);
 
-  // loader(messageDiv);
-  // console.log(model);
+  loader(messageDiv);
   messageDiv.innerHTML = '';
-  
+
   const response = await fetch(`${serverUrl}/chat`, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(conversation),
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      conversation: conversation, // Include the conversation array here
+      model: model, // Include the model name here
+    }),
   });
-  
-  if (!response.ok) {
-    throw new Error(`Server responded with status code ${response.status}`);
+
+  const eventSource = new EventSource(`${serverUrl}/chat`);
+
+  if (typeof EventSource !== 'undefined') {
+    // console.log('success');
+  } else {
+    console.log('something is wrong with the EventSource');
   }
-  const answer = await response.json();
-  console.log(answer);
-  const botAnswer = answer.data;
-  messageDiv.innerHTML = botAnswer;
+
+  eventSource.onmessage = (e) => {
+    clearInterval(loadInterval);
+    const eventData = JSON.parse(e.data);
+    // console.log(eventData.botResponse);
+    if (eventData.botResponse) {
+      messageDiv.innerHTML += eventData.botResponse;
+    }
+  };
+
+  eventSource.onerror = (err) => {
+    const assitantMessage = {
+      role: 'assistant',
+      content: messageDiv.innerHTML,
+    };
+    conversation.push(assitantMessage);
+    localStorage.setItem('conversation', JSON.stringify(conversation));
+    eventSource.close();
+  };
 };
+// window.onload()
+document.addEventListener('DOMContentLoaded', () => {
+  //user's chatstrip
+  conversation
+    .filter((message) => message.role !== 'system')
+    .forEach((message) => {
+      message.role === 'user'
+        ? (chatContainer.innerHTML += chatStripe(false, message.content))
+        : (chatContainer.innerHTML += chatStripe(
+            true,
+            message.content,
+            uuid()
+          ));
+    });
+});
 
-document.addEventListener('DOMContentLoaded', sendInitialData);
-
+// });
+const button = document.getElementById('reset');
+button.addEventListener('click', () => {
+  localStorage.removeItem('conversation');
+  conversation = [
+    {
+      role: 'system',
+      content:
+        'The following is a conversation with an AI assistant named Winston. The assistant is helpful, creative, clever, and very friendly. The assistant uses markdown output whenever possible.\n',
+    },
+  ];
+});
 form.addEventListener('submit', handleSubmit);
 form.addEventListener('keyup', (e) => {
   if (e.key === 'Enter') {
     handleSubmit(e);
   }
+  // if (e.key === 'ArrowUp') {
+  //   const data = new FormData(form);
+  //   // data.value = 'you pressed ArrowUp';
+  //   data.set('prompt', 'you pressed ArrowDown');
+  //   console.log(data.get('prompt'));
+  // }
 });
