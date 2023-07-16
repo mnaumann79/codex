@@ -9,7 +9,7 @@ import user from './assets/user.svg';
 import { v4 as uuid } from 'uuid';
 import * as marked from 'marked';
 import MarkdownIt from 'markdown-it';
-// console.log(uuid());
+
 const md = new MarkdownIt();
 
 const form = document.querySelector('form');
@@ -50,7 +50,6 @@ const chatStripe = (isAi, value, uniqueId) => {
   // console.log(markdownValue);
   // const markdownValue = value;
   // const sanitizedValue = DOMPurify.sanitize(markdownValue);
-  const dateTime = new Date().toISOString;
 
   return `    
       <div class="wrapper ${isAi && 'ai'}">
@@ -87,7 +86,6 @@ const handleSubmit = async (e) => {
   const messageDiv = document.getElementById(uniqueId);
 
   loader(messageDiv);
-  messageDiv.innerHTML = '';
 
   const response = await fetch(`${serverUrl}/chat`, {
     method: 'POST',
@@ -106,12 +104,16 @@ const handleSubmit = async (e) => {
     console.log('something is wrong with the EventSource');
   }
 
+  messageDiv.innerHTML = '';
   eventSource.onmessage = (e) => {
     clearInterval(loadInterval);
     const eventData = JSON.parse(e.data);
     // console.log(eventData.botResponse);
     if (eventData.botResponse) {
       messageDiv.innerHTML += eventData.botResponse;
+    }
+    if (eventData.message) {
+      messageDiv.innerHTML += eventData.message;
     }
   };
 
@@ -131,11 +133,13 @@ document.addEventListener('DOMContentLoaded', () => {
   conversation
     .filter((message) => message.role !== 'system')
     .forEach((message) => {
+      // const renderedMessage = md.render(message.content);
+      const renderedMessage = message.content;
       message.role === 'user'
-        ? (chatContainer.innerHTML += chatStripe(false, message.content))
+        ? (chatContainer.innerHTML += chatStripe(false, renderedMessage))
         : (chatContainer.innerHTML += chatStripe(
             true,
-            message.content,
+            renderedMessage,
             uuid()
           ));
     });
@@ -158,10 +162,10 @@ form.addEventListener('keyup', (e) => {
   if (e.key === 'Enter') {
     handleSubmit(e);
   }
-  // if (e.key === 'ArrowUp') {
-  //   const data = new FormData(form);
-  //   // data.value = 'you pressed ArrowUp';
-  //   data.set('prompt', 'you pressed ArrowDown');
-  //   console.log(data.get('prompt'));
-  // }
+  if (e.key === 'ArrowUp') {
+    const textArea = document.getElementsByTagName('textarea');
+    // data.value = 'you pressed ArrowUp';
+    textArea.textArea = 'you pressed ArrowDown';
+    // console.log(data.get('prompt'));
+  }
 });
