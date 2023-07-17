@@ -68,7 +68,7 @@ app.get('/chat', async (req, res) => {
       }
     } catch (error) {
       res.write(
-        `data: OpenAI API responded with status code ${response.status}`
+        `data: ${JSON.stringify({message: `OpenAI API responded with status code ${response.status}`})}\n\n`
       );
     }
 
