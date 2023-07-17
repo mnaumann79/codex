@@ -81,7 +81,6 @@ const handleSubmit = async (e) => {
   //bot's chatstripe
   const uniqueId = uuid();
   chatContainer.innerHTML += chatStripe(true, ' ', uniqueId);
-  chatContainer.scrollTop = chatContainer.scrollHeight;
 
   const messageDiv = document.getElementById(uniqueId);
 
@@ -115,6 +114,7 @@ const handleSubmit = async (e) => {
     if (eventData.message) {
       messageDiv.innerHTML += eventData.message;
     }
+    chatContainer.scrollTop = chatContainer.scrollHeight;
   };
 
   eventSource.onerror = (err) => {
@@ -130,11 +130,12 @@ const handleSubmit = async (e) => {
 // window.onload()
 document.addEventListener('DOMContentLoaded', () => {
   //user's chatstrip
+  // console.log(conversation);
   conversation
     .filter((message) => message.role !== 'system')
     .forEach((message) => {
       // const renderedMessage = md.render(message.content);
-      const renderedMessage = message.content;
+      const renderedMessage = md.render(message.content);
       message.role === 'user'
         ? (chatContainer.innerHTML += chatStripe(false, renderedMessage))
         : (chatContainer.innerHTML += chatStripe(
@@ -143,6 +144,7 @@ document.addEventListener('DOMContentLoaded', () => {
             uuid()
           ));
     });
+  chatContainer.scrollTop = chatContainer.scrollHeight;
 });
 
 // });
