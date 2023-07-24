@@ -11,6 +11,9 @@
   </head>
   <body>
     <div id="app">
+      <header>
+        <button id="reset" class="button">reset conversation</button>
+      </header>
       <div id="chat_container"></div>
       <form action="">
         <textarea
@@ -18,10 +21,11 @@
           cols="1"
           rows="1"
           placeholder="Ask Codex ..."
+          autofocus
         ></textarea>
         <button type="submit"><img src="assets/send.svg" /></button>
       </form>
     </div>
-    <script type="module" src="script.js"></script>
+    <script type="module" src="client.js"></script>
   </body>
 </html>
