@@ -33,6 +33,7 @@ app.post('/chat', async (req, res) => {
   } catch (error) {
     console.log(error.message);
   }
+  // console.log(model);
 });
 
 app.get('/chat', async (req, res) => {
@@ -68,10 +69,12 @@ app.get('/chat', async (req, res) => {
       }
     } catch (error) {
       res.write(
-        `data: ${JSON.stringify({message: `OpenAI API responded with status code ${response.status}`})}\n\n`
+        `data: ${JSON.stringify({
+          message: `OpenAI API responded with status code ${response.status}`,
+        })}\n\n`
       );
     }
-
+    console.log()
     await new Promise((resolve, reject) => {
       response.body
         .pipe(
@@ -113,10 +116,10 @@ app.get('/chat', async (req, res) => {
         });
     });
   } catch (err) {
-    console.log(`an error was caught ${err}`);
+    console.log(`This error is caught: ${err}`);
   }
 });
 
-app.listen(5000, () => {
-  console.log('Server is listening');
+app.listen(process.env.PORT, () => {
+  console.log(`Server is listening at port ${process.env.PORT}`);
 });

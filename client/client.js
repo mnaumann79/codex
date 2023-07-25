@@ -7,7 +7,7 @@ import user from './assets/user.svg';
 // import bot from './assets/bot.svg'
 // const { v4: uuid } = require('uuid');
 import { v4 as uuid } from 'uuid';
-import * as marked from 'marked';
+// import * as marked from 'marked';
 import MarkdownIt from 'markdown-it';
 
 const md = new MarkdownIt();
@@ -98,7 +98,7 @@ const handleSubmit = async (e) => {
   const eventSource = new EventSource(`${serverUrl}/chat`);
 
   if (typeof EventSource !== 'undefined') {
-    // console.log('success');
+    console.log('success');
   } else {
     console.log('something is wrong with the EventSource');
   }
