@@ -9,6 +9,14 @@ import * as dotenv from 'dotenv';
 import cors from 'cors';
 import { Transform } from 'stream';
 
+// const express = require('express');
+// const fetch = require('node-fetch');
+// // const dotenv = require('dotenv')
+// const cors = require('cors');
+// const Transform = require('stream').Transform;
+
+
+
 // Only for testing purposes, do not use in production
 // process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
@@ -27,13 +35,14 @@ app.use(express.urlencoded({ extended: true })); // Add express.urlencoded() mid
 app.post('/chat', async (req, res) => {
   try {
     const data = req.body;
+    // console.log(JSON.stringify(data));
     conversation.push(...data.conversation);
     model = data.model;
-    res.sendStatus(200);
+    res.status(200).json({"message":"success"});
   } catch (error) {
-    console.log(error.message);
+    console.log(error);
   }
-  // console.log(model);
+  console.log(model);
 });
 
 app.get('/chat', async (req, res) => {
